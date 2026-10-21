@@ -11,13 +11,3 @@
 - MASM / LINK：[Microsoft MS-DOS v4.0 TOOLS](https://github.com/microsoft/MS-DOS/tree/main/v4.0/src/TOOLS)。
 - DEBUG：[FreeDOS Debug/X 2.50](https://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/dos/debug/debugx/2.50/)。
 
-本次实际使用的文件 SHA256：
-
-```text
-MASM.EXE  1C6286C69B616160B8475AD17453EE872702A2C98075C2159EC792A1C745275F
-LINK.EXE  124A3C800EDC16B60F696D35A9DFEC798B68B78FE2CA90C5988EA76BDEAB1A8A
-```
-
-DEBUG.COM 的本次哈希见根目录 `SHA256SUMS.txt`。这些哈希用于标识验证所用文件，不表示已核验外部签名。
-
-DOSBox 启动后将仓库根目录挂载为 C:，PATH 为 C:\TOOLS；因此仓库移动位置后无需修改 DOS 内的工具路径。

@@ -1,0 +1,19 @@
+* text=auto
+*.ASM text eol=crlf
+*.INC text eol=crlf
+*.BAT text eol=crlf
+*.DBG text eol=crlf
+*.ps1 text eol=crlf
+*.md text eol=lf
+*.EXE binary
+*.exe binary
+# Preserve whitespace emitted by DOS tools and exact output captures.
+*.LOG -whitespace
+*.LST -whitespace
+*.TXT -whitespace
+*.txt -whitespace
+/hw3/TESTS/I*.TXT -text
+/hw1/NORMAL.TXT -text
+/hw1/OFFSET.TXT -text
+/hw2/LOOP13.TXT -text
+/hw2/JUMP13.TXT -text

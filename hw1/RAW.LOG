@@ -1,0 +1,27 @@
+-r
+AX=0000 BX=0000 CX=0000 DX=0000 SP=FFFE BP=0000 SI=0000 DI=0000 
+DS=0725 ES=0725 SS=0725 CS=0725 IP=0100 NV UP EI PL NZ NA PO NC 
+0725:0100 C3                RET
+-e cs:0100 0e 1f ba 00 02 b4 09 cd 21 b8 00 4c cd 21
+-e cs:0200 48 65 6c 6c 6f 20 77 6f 72 6c 64 21 0d 0a 24
+-d cs:0200 l 0f
+0725:0200  48 65 6C 6C 6F 20 77 6F-72 6C 64 21 0D 0A 24    Hello world!..$
+-u cs:0100 l 0e
+0725:0100 0E                PUSH    CS
+0725:0101 1F                POP     DS
+0725:0102 BA0002            MOV     DX,0200
+0725:0105 B409              MOV     AH,09
+0725:0107 CD21              INT     21
+0725:0109 B8004C            MOV     AX,4C00
+0725:010C CD21              INT     21
+-r ip
+IP 0100  :0100
+-r
+AX=0000 BX=0000 CX=0000 DX=0000 SP=FFFE BP=0000 SI=0000 DI=0000 
+DS=0725 ES=0725 SS=0725 CS=0725 IP=0100 NV UP EI PL NZ NA PO NC 
+0725:0100 0E                PUSH    CS
+-g
+Hello world!
+
+Program terminated normally (0000)
+-q

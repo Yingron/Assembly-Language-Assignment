@@ -1,0 +1,17 @@
+-r
+AX=FFFF BX=0000 CX=0021 DX=0000 SP=0100 BP=0000 SI=0000 DI=0000 
+DS=0730 ES=0730 SS=0743 CS=0740 IP=0000 NV UP EI PL ZR NA PE NC 
+0740:0000 B84107            MOV     AX,0741
+-u cs:0000 l 11
+0740:0000 B84107            MOV     AX,0741
+0740:0003 8ED8              MOV     DS,AX
+0740:0005 BA0200            MOV     DX,0002
+0740:0008 B409              MOV     AH,09
+0740:000A CD21              INT     21
+0740:000C B8004C            MOV     AX,4C00
+0740:000F CD21              INT     21
+-g
+Hello world!
+
+Program terminated normally (0000)
+-q

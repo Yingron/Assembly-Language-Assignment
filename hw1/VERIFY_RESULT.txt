@@ -1,0 +1,1 @@
+PASS: both EXEs, raw-memory execution, assembler results, and DOS exit status.

@@ -1,0 +1,681 @@
+
+ASCII13_C.exe:     file format pei-x86-64
+
+
+Disassembly of section .text:
+
+0000000100401000 <WinMainCRTStartup>:
+   100401000:	48 83 ec 28          	sub    rsp,0x28
+   100401004:	48 8d 0d 75 00 00 00 	lea    rcx,[rip+0x75]        # 100401080 <main>
+   10040100b:	e8 10 01 00 00       	call   100401120 <cygwin_crt0>
+   100401010:	45 31 c0             	xor    r8d,r8d
+   100401013:	31 d2                	xor    edx,edx
+   100401015:	31 c9                	xor    ecx,ecx
+   100401017:	e8 24 01 00 00       	call   100401140 <cygwin_premain0>
+   10040101c:	45 31 c0             	xor    r8d,r8d
+   10040101f:	31 d2                	xor    edx,edx
+   100401021:	31 c9                	xor    ecx,ecx
+   100401023:	e8 28 01 00 00       	call   100401150 <cygwin_premain1>
+   100401028:	45 31 c0             	xor    r8d,r8d
+   10040102b:	31 d2                	xor    edx,edx
+   10040102d:	31 c9                	xor    ecx,ecx
+   10040102f:	e8 2c 01 00 00       	call   100401160 <cygwin_premain2>
+   100401034:	45 31 c0             	xor    r8d,r8d
+   100401037:	31 d2                	xor    edx,edx
+   100401039:	31 c9                	xor    ecx,ecx
+   10040103b:	48 83 c4 28          	add    rsp,0x28
+   10040103f:	e9 2c 01 00 00       	jmp    100401170 <cygwin_premain3>
+   100401044:	90                   	nop
+   100401045:	90                   	nop
+   100401046:	90                   	nop
+   100401047:	90                   	nop
+   100401048:	90                   	nop
+   100401049:	90                   	nop
+   10040104a:	90                   	nop
+   10040104b:	90                   	nop
+   10040104c:	90                   	nop
+   10040104d:	90                   	nop
+   10040104e:	90                   	nop
+   10040104f:	90                   	nop
+
+0000000100401050 <__gcc_register_frame>:
+   100401050:	4c 8d 05 a9 0f 00 00 	lea    r8,[rip+0xfa9]        # 100402000 <__data_start__>
+   100401057:	31 d2                	xor    edx,edx
+   100401059:	48 8d 0d 10 00 00 00 	lea    rcx,[rip+0x10]        # 100401070 <__gcc_deregister_frame>
+   100401060:	e9 8b 00 00 00       	jmp    1004010f0 <__cxa_atexit>
+   100401065:	66 66 2e 0f 1f 84 00 	data16 cs nop WORD PTR [rax+rax*1+0x0]
+   10040106c:	00 00 00 00 
+
+0000000100401070 <__gcc_deregister_frame>:
+   100401070:	c3                   	ret
+   100401071:	90                   	nop
+   100401072:	90                   	nop
+   100401073:	90                   	nop
+   100401074:	90                   	nop
+   100401075:	90                   	nop
+   100401076:	90                   	nop
+   100401077:	90                   	nop
+   100401078:	90                   	nop
+   100401079:	90                   	nop
+   10040107a:	90                   	nop
+   10040107b:	90                   	nop
+   10040107c:	90                   	nop
+   10040107d:	90                   	nop
+   10040107e:	90                   	nop
+   10040107f:	90                   	nop
+
+0000000100401080 <main>:
+#include <stdio.h>
+
+int main(void)
+{
+   100401080:	55                   	push   rbp
+   100401081:	48 89 e5             	mov    rbp,rsp
+   100401084:	48 83 ec 30          	sub    rsp,0x30
+   100401088:	e8 73 00 00 00       	call   100401100 <__main>
+    int ch = 'a';
+   10040108d:	c7 45 fc 61 00 00 00 	mov    DWORD PTR [rbp-0x4],0x61
+    for (int row = 0; row < 2; ++row) {
+   100401094:	c7 45 f8 00 00 00 00 	mov    DWORD PTR [rbp-0x8],0x0
+   10040109b:	eb 3f                	jmp    1004010dc <main+0x5c>
+        for (int col = 0; col < 13; ++col) {
+   10040109d:	c7 45 f4 00 00 00 00 	mov    DWORD PTR [rbp-0xc],0x0
+   1004010a4:	eb 22                	jmp    1004010c8 <main+0x48>
+            putchar(ch);
+   1004010a6:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+   1004010a9:	89 c1                	mov    ecx,eax
+   1004010ab:	e8 60 00 00 00       	call   100401110 <putchar>
+            ++ch;
+   1004010b0:	83 45 fc 01          	add    DWORD PTR [rbp-0x4],0x1
+            if (col < 12) {
+   1004010b4:	83 7d f4 0b          	cmp    DWORD PTR [rbp-0xc],0xb
+   1004010b8:	7f 0a                	jg     1004010c4 <main+0x44>
+                putchar(' ');
+   1004010ba:	b9 20 00 00 00       	mov    ecx,0x20
+   1004010bf:	e8 4c 00 00 00       	call   100401110 <putchar>
+        for (int col = 0; col < 13; ++col) {
+   1004010c4:	83 45 f4 01          	add    DWORD PTR [rbp-0xc],0x1
+   1004010c8:	83 7d f4 0c          	cmp    DWORD PTR [rbp-0xc],0xc
+   1004010cc:	7e d8                	jle    1004010a6 <main+0x26>
+            }
+        }
+        putchar('\n');
+   1004010ce:	b9 0a 00 00 00       	mov    ecx,0xa
+   1004010d3:	e8 38 00 00 00       	call   100401110 <putchar>
+    for (int row = 0; row < 2; ++row) {
+   1004010d8:	83 45 f8 01          	add    DWORD PTR [rbp-0x8],0x1
+   1004010dc:	83 7d f8 01          	cmp    DWORD PTR [rbp-0x8],0x1
+   1004010e0:	7e bb                	jle    10040109d <main+0x1d>
+    }
+    return 0;
+   1004010e2:	b8 00 00 00 00       	mov    eax,0x0
+}
+   1004010e7:	48 83 c4 30          	add    rsp,0x30
+   1004010eb:	5d                   	pop    rbp
+   1004010ec:	c3                   	ret
+   1004010ed:	90                   	nop
+   1004010ee:	90                   	nop
+   1004010ef:	90                   	nop
+
+00000001004010f0 <__cxa_atexit>:
+   1004010f0:	ff 25 ca 6f 00 00    	jmp    QWORD PTR [rip+0x6fca]        # 1004080c0 <__IAT_start__>
+   1004010f6:	90                   	nop
+   1004010f7:	90                   	nop
+   1004010f8:	90                   	nop
+   1004010f9:	90                   	nop
+   1004010fa:	90                   	nop
+   1004010fb:	90                   	nop
+   1004010fc:	90                   	nop
+   1004010fd:	90                   	nop
+   1004010fe:	90                   	nop
+   1004010ff:	90                   	nop
+
+0000000100401100 <__main>:
+   100401100:	ff 25 c2 6f 00 00    	jmp    QWORD PTR [rip+0x6fc2]        # 1004080c8 <__imp___main>
+   100401106:	90                   	nop
+   100401107:	90                   	nop
+   100401108:	90                   	nop
+   100401109:	90                   	nop
+   10040110a:	90                   	nop
+   10040110b:	90                   	nop
+   10040110c:	90                   	nop
+   10040110d:	90                   	nop
+   10040110e:	90                   	nop
+   10040110f:	90                   	nop
+
+0000000100401110 <putchar>:
+   100401110:	ff 25 02 70 00 00    	jmp    QWORD PTR [rip+0x7002]        # 100408118 <__imp_putchar>
+   100401116:	90                   	nop
+   100401117:	90                   	nop
+   100401118:	90                   	nop
+   100401119:	90                   	nop
+   10040111a:	90                   	nop
+   10040111b:	90                   	nop
+   10040111c:	90                   	nop
+   10040111d:	90                   	nop
+   10040111e:	90                   	nop
+   10040111f:	90                   	nop
+
+0000000100401120 <cygwin_crt0>:
+   100401120:	48 83 ec 28          	sub    rsp,0x28
+   100401124:	31 d2                	xor    edx,edx
+   100401126:	e8 55 00 00 00       	call   100401180 <_cygwin_crt0_common>
+   10040112b:	ff 15 9f 6f 00 00    	call   QWORD PTR [rip+0x6f9f]        # 1004080d0 <__imp__dll_crt0>
+   100401131:	90                   	nop
+   100401132:	90                   	nop
+   100401133:	90                   	nop
+   100401134:	90                   	nop
+   100401135:	90                   	nop
+   100401136:	90                   	nop
+   100401137:	90                   	nop
+   100401138:	90                   	nop
+   100401139:	90                   	nop
+   10040113a:	90                   	nop
+   10040113b:	90                   	nop
+   10040113c:	90                   	nop
+   10040113d:	90                   	nop
+   10040113e:	90                   	nop
+   10040113f:	90                   	nop
+
+0000000100401140 <cygwin_premain0>:
+   100401140:	c3                   	ret
+   100401141:	90                   	nop
+   100401142:	90                   	nop
+   100401143:	90                   	nop
+   100401144:	90                   	nop
+   100401145:	90                   	nop
+   100401146:	90                   	nop
+   100401147:	90                   	nop
+   100401148:	90                   	nop
+   100401149:	90                   	nop
+   10040114a:	90                   	nop
+   10040114b:	90                   	nop
+   10040114c:	90                   	nop
+   10040114d:	90                   	nop
+   10040114e:	90                   	nop
+   10040114f:	90                   	nop
+
+0000000100401150 <cygwin_premain1>:
+   100401150:	c3                   	ret
+   100401151:	90                   	nop
+   100401152:	90                   	nop
+   100401153:	90                   	nop
+   100401154:	90                   	nop
+   100401155:	90                   	nop
+   100401156:	90                   	nop
+   100401157:	90                   	nop
+   100401158:	90                   	nop
+   100401159:	90                   	nop
+   10040115a:	90                   	nop
+   10040115b:	90                   	nop
+   10040115c:	90                   	nop
+   10040115d:	90                   	nop
+   10040115e:	90                   	nop
+   10040115f:	90                   	nop
+
+0000000100401160 <cygwin_premain2>:
+   100401160:	c3                   	ret
+   100401161:	90                   	nop
+   100401162:	90                   	nop
+   100401163:	90                   	nop
+   100401164:	90                   	nop
+   100401165:	90                   	nop
+   100401166:	90                   	nop
+   100401167:	90                   	nop
+   100401168:	90                   	nop
+   100401169:	90                   	nop
+   10040116a:	90                   	nop
+   10040116b:	90                   	nop
+   10040116c:	90                   	nop
+   10040116d:	90                   	nop
+   10040116e:	90                   	nop
+   10040116f:	90                   	nop
+
+0000000100401170 <cygwin_premain3>:
+   100401170:	c3                   	ret
+   100401171:	90                   	nop
+   100401172:	90                   	nop
+   100401173:	90                   	nop
+   100401174:	90                   	nop
+   100401175:	90                   	nop
+   100401176:	90                   	nop
+   100401177:	90                   	nop
+   100401178:	90                   	nop
+   100401179:	90                   	nop
+   10040117a:	90                   	nop
+   10040117b:	90                   	nop
+   10040117c:	90                   	nop
+   10040117d:	90                   	nop
+   10040117e:	90                   	nop
+   10040117f:	90                   	nop
+
+0000000100401180 <_cygwin_crt0_common>:
+   100401180:	56                   	push   rsi
+   100401181:	53                   	push   rbx
+   100401182:	48 83 ec 28          	sub    rsp,0x28
+   100401186:	48 89 ce             	mov    rsi,rcx
+   100401189:	48 89 d3             	mov    rbx,rdx
+   10040118c:	b9 08 00 00 00       	mov    ecx,0x8
+   100401191:	e8 ca 04 00 00       	call   100401660 <cygwin_internal>
+   100401196:	48 85 db             	test   rbx,rbx
+   100401199:	0f 84 34 02 00 00    	je     1004013d3 <_cygwin_crt0_common+0x253>
+   10040119f:	48 ba 00 00 00 00 65 	movabs rdx,0x16500000000
+   1004011a6:	01 00 00 
+   1004011a9:	48 89 93 f0 00 00 00 	mov    QWORD PTR [rbx+0xf0],rdx
+   1004011b0:	48 8d 0d 29 20 00 00 	lea    rcx,[rip+0x2029]        # 1004031e0 <__CTOR_LIST__>
+   1004011b7:	48 89 4b 48          	mov    QWORD PTR [rbx+0x48],rcx
+   1004011bb:	48 8d 15 36 20 00 00 	lea    rdx,[rip+0x2036]        # 1004031f8 <__DTOR_LIST__>
+   1004011c2:	48 89 53 50          	mov    QWORD PTR [rbx+0x50],rdx
+   1004011c6:	48 8b 15 0b 6f 00 00 	mov    rdx,QWORD PTR [rip+0x6f0b]        # 1004080d8 <__imp__impure_ptr>
+   1004011cd:	48 89 53 18          	mov    QWORD PTR [rbx+0x18],rdx
+   1004011d1:	48 89 73 40          	mov    QWORD PTR [rbx+0x40],rsi
+   1004011d5:	48 8d 35 64 ff ff ff 	lea    rsi,[rip+0xffffffffffffff64]        # 100401140 <cygwin_premain0>
+   1004011dc:	48 89 b3 80 00 00 00 	mov    QWORD PTR [rbx+0x80],rsi
+   1004011e3:	48 8d 35 66 ff ff ff 	lea    rsi,[rip+0xffffffffffffff66]        # 100401150 <cygwin_premain1>
+   1004011ea:	48 89 b3 88 00 00 00 	mov    QWORD PTR [rbx+0x88],rsi
+   1004011f1:	48 8d 0d 68 ff ff ff 	lea    rcx,[rip+0xffffffffffffff68]        # 100401160 <cygwin_premain2>
+   1004011f8:	48 89 8b 90 00 00 00 	mov    QWORD PTR [rbx+0x90],rcx
+   1004011ff:	48 8d 35 6a ff ff ff 	lea    rsi,[rip+0xffffffffffffff6a]        # 100401170 <cygwin_premain3>
+   100401206:	48 89 b3 98 00 00 00 	mov    QWORD PTR [rbx+0x98],rsi
+   10040120d:	48 8d 15 ec 5d 00 00 	lea    rdx,[rip+0x5dec]        # 100407000 <__bss_start__>
+   100401214:	48 89 53 38          	mov    QWORD PTR [rbx+0x38],rdx
+   100401218:	48 c7 03 00 00 00 00 	mov    QWORD PTR [rbx],0x0
+   10040121f:	48 b9 48 01 00 00 be 	movabs rcx,0xbbe00000148
+   100401226:	0b 00 00 
+   100401229:	48 89 4b 08          	mov    QWORD PTR [rbx+0x8],rcx
+   10040122d:	c7 43 10 06 00 00 00 	mov    DWORD PTR [rbx+0x10],0x6
+   100401234:	48 8d 35 45 04 00 00 	lea    rsi,[rip+0x445]        # 100401680 <malloc>
+   10040123b:	48 89 73 20          	mov    QWORD PTR [rbx+0x20],rsi
+   10040123f:	48 8d 15 2a 04 00 00 	lea    rdx,[rip+0x42a]        # 100401670 <free>
+   100401246:	48 89 53 28          	mov    QWORD PTR [rbx+0x28],rdx
+   10040124a:	48 8d 0d 4f 04 00 00 	lea    rcx,[rip+0x44f]        # 1004016a0 <realloc>
+   100401251:	48 89 4b 30          	mov    QWORD PTR [rbx+0x30],rcx
+   100401255:	48 8d 35 e4 03 00 00 	lea    rsi,[rip+0x3e4]        # 100401640 <calloc>
+   10040125c:	48 89 73 78          	mov    QWORD PTR [rbx+0x78],rsi
+   100401260:	48 8d 15 29 04 00 00 	lea    rdx,[rip+0x429]        # 100401690 <posix_memalign>
+   100401267:	48 89 93 18 01 00 00 	mov    QWORD PTR [rbx+0x118],rdx
+   10040126e:	48 85 c0             	test   rax,rax
+   100401271:	0f 84 e5 00 00 00    	je     10040135c <_cygwin_crt0_common+0x1dc>
+   100401277:	48 8b 80 e0 00 00 00 	mov    rax,QWORD PTR [rax+0xe0]
+   10040127e:	48 85 c0             	test   rax,rax
+   100401281:	0f 84 d5 00 00 00    	je     10040135c <_cygwin_crt0_common+0x1dc>
+   100401287:	8b 15 83 5d 00 00    	mov    edx,DWORD PTR [rip+0x5d83]        # 100407010 <__dynamically_loaded>
+   10040128d:	85 d2                	test   edx,edx
+   10040128f:	0f 85 c7 00 00 00    	jne    10040135c <_cygwin_crt0_common+0x1dc>
+   100401295:	48 83 3d 83 0d 00 00 	cmp    QWORD PTR [rip+0xd83],0x0        # 100402020 <__cygwin_cxx_malloc>
+   10040129c:	00 
+   10040129d:	0f 84 26 02 00 00    	je     1004014c9 <_cygwin_crt0_common+0x349>
+   1004012a3:	48 83 3d 7d 0d 00 00 	cmp    QWORD PTR [rip+0xd7d],0x0        # 100402028 <__cygwin_cxx_malloc+0x8>
+   1004012aa:	00 
+   1004012ab:	0f 84 87 02 00 00    	je     100401538 <_cygwin_crt0_common+0x3b8>
+   1004012b1:	48 83 3d 77 0d 00 00 	cmp    QWORD PTR [rip+0xd77],0x0        # 100402030 <__cygwin_cxx_malloc+0x10>
+   1004012b8:	00 
+   1004012b9:	0f 84 69 02 00 00    	je     100401528 <_cygwin_crt0_common+0x3a8>
+   1004012bf:	48 83 3d 71 0d 00 00 	cmp    QWORD PTR [rip+0xd71],0x0        # 100402038 <__cygwin_cxx_malloc+0x18>
+   1004012c6:	00 
+   1004012c7:	0f 84 4b 02 00 00    	je     100401518 <_cygwin_crt0_common+0x398>
+   1004012cd:	48 83 3d 6b 0d 00 00 	cmp    QWORD PTR [rip+0xd6b],0x0        # 100402040 <__cygwin_cxx_malloc+0x20>
+   1004012d4:	00 
+   1004012d5:	0f 84 2d 02 00 00    	je     100401508 <_cygwin_crt0_common+0x388>
+   1004012db:	48 83 3d 65 0d 00 00 	cmp    QWORD PTR [rip+0xd65],0x0        # 100402048 <__cygwin_cxx_malloc+0x28>
+   1004012e2:	00 
+   1004012e3:	0f 84 0f 02 00 00    	je     1004014f8 <_cygwin_crt0_common+0x378>
+   1004012e9:	48 83 3d 5f 0d 00 00 	cmp    QWORD PTR [rip+0xd5f],0x0        # 100402050 <__cygwin_cxx_malloc+0x30>
+   1004012f0:	00 
+   1004012f1:	0f 84 f1 01 00 00    	je     1004014e8 <_cygwin_crt0_common+0x368>
+   1004012f7:	48 83 3d 59 0d 00 00 	cmp    QWORD PTR [rip+0xd59],0x0        # 100402058 <__cygwin_cxx_malloc+0x38>
+   1004012fe:	00 
+   1004012ff:	0f 84 d3 01 00 00    	je     1004014d8 <_cygwin_crt0_common+0x358>
+   100401305:	48 8b 15 14 0d 00 00 	mov    rdx,QWORD PTR [rip+0xd14]        # 100402020 <__cygwin_cxx_malloc>
+   10040130c:	48 89 10             	mov    QWORD PTR [rax],rdx
+   10040130f:	48 8b 15 12 0d 00 00 	mov    rdx,QWORD PTR [rip+0xd12]        # 100402028 <__cygwin_cxx_malloc+0x8>
+   100401316:	48 89 50 08          	mov    QWORD PTR [rax+0x8],rdx
+   10040131a:	48 8b 15 0f 0d 00 00 	mov    rdx,QWORD PTR [rip+0xd0f]        # 100402030 <__cygwin_cxx_malloc+0x10>
+   100401321:	48 89 50 10          	mov    QWORD PTR [rax+0x10],rdx
+   100401325:	48 8b 15 0c 0d 00 00 	mov    rdx,QWORD PTR [rip+0xd0c]        # 100402038 <__cygwin_cxx_malloc+0x18>
+   10040132c:	48 89 50 18          	mov    QWORD PTR [rax+0x18],rdx
+   100401330:	48 8b 15 09 0d 00 00 	mov    rdx,QWORD PTR [rip+0xd09]        # 100402040 <__cygwin_cxx_malloc+0x20>
+   100401337:	48 89 50 20          	mov    QWORD PTR [rax+0x20],rdx
+   10040133b:	48 8b 15 06 0d 00 00 	mov    rdx,QWORD PTR [rip+0xd06]        # 100402048 <__cygwin_cxx_malloc+0x28>
+   100401342:	48 89 50 28          	mov    QWORD PTR [rax+0x28],rdx
+   100401346:	48 8b 15 03 0d 00 00 	mov    rdx,QWORD PTR [rip+0xd03]        # 100402050 <__cygwin_cxx_malloc+0x30>
+   10040134d:	48 89 50 30          	mov    QWORD PTR [rax+0x30],rdx
+   100401351:	48 8b 15 00 0d 00 00 	mov    rdx,QWORD PTR [rip+0xd00]        # 100402058 <__cygwin_cxx_malloc+0x38>
+   100401358:	48 89 50 38          	mov    QWORD PTR [rax+0x38],rdx
+   10040135c:	31 c9                	xor    ecx,ecx
+   10040135e:	e8 8d 03 00 00       	call   1004016f0 <GetModuleHandleA>
+   100401363:	48 89 83 e8 00 00 00 	mov    QWORD PTR [rbx+0xe8],rax
+   10040136a:	48 8d 05 8f 0c 00 00 	lea    rax,[rip+0xc8f]        # 100402000 <__data_start__>
+   100401371:	48 89 43 58          	mov    QWORD PTR [rbx+0x58],rax
+   100401375:	48 8d 05 e4 0c 00 00 	lea    rax,[rip+0xce4]        # 100402060 <__data_end__>
+   10040137c:	48 89 43 60          	mov    QWORD PTR [rbx+0x60],rax
+   100401380:	48 8d 05 79 5c 00 00 	lea    rax,[rip+0x5c79]        # 100407000 <__bss_start__>
+   100401387:	48 89 43 68          	mov    QWORD PTR [rbx+0x68],rax
+   10040138b:	48 8d 05 2e 5e 00 00 	lea    rax,[rip+0x5e2e]        # 1004071c0 <__bss_end__>
+   100401392:	48 89 43 70          	mov    QWORD PTR [rbx+0x70],rax
+   100401396:	48 8d 05 43 1e 00 00 	lea    rax,[rip+0x1e43]        # 1004031e0 <__CTOR_LIST__>
+   10040139d:	48 89 83 20 01 00 00 	mov    QWORD PTR [rbx+0x120],rax
+   1004013a4:	48 8d 05 35 1e 00 00 	lea    rax,[rip+0x1e35]        # 1004031e0 <__CTOR_LIST__>
+   1004013ab:	48 89 83 28 01 00 00 	mov    QWORD PTR [rbx+0x128],rax
+   1004013b2:	48 8d 05 47 ec ff ff 	lea    rax,[rip+0xffffffffffffec47]        # 100400000 <__size_of_stack_reserve__+0x100200000>
+   1004013b9:	48 89 83 30 01 00 00 	mov    QWORD PTR [rbx+0x130],rax
+   1004013c0:	31 c9                	xor    ecx,ecx
+   1004013c2:	e8 69 02 00 00       	call   100401630 <_pei386_runtime_relocator>
+   1004013c7:	b8 01 00 00 00       	mov    eax,0x1
+   1004013cc:	48 83 c4 28          	add    rsp,0x28
+   1004013d0:	5b                   	pop    rbx
+   1004013d1:	5e                   	pop    rsi
+   1004013d2:	c3                   	ret
+   1004013d3:	48 b9 00 00 00 00 65 	movabs rcx,0x16500000000
+   1004013da:	01 00 00 
+   1004013dd:	48 89 88 f0 00 00 00 	mov    QWORD PTR [rax+0xf0],rcx
+   1004013e4:	48 8d 0d f5 1d 00 00 	lea    rcx,[rip+0x1df5]        # 1004031e0 <__CTOR_LIST__>
+   1004013eb:	48 89 48 48          	mov    QWORD PTR [rax+0x48],rcx
+   1004013ef:	48 8d 15 02 1e 00 00 	lea    rdx,[rip+0x1e02]        # 1004031f8 <__DTOR_LIST__>
+   1004013f6:	48 89 50 50          	mov    QWORD PTR [rax+0x50],rdx
+   1004013fa:	48 8b 88 40 01 00 00 	mov    rcx,QWORD PTR [rax+0x140]
+   100401401:	48 8b 15 d0 6c 00 00 	mov    rdx,QWORD PTR [rip+0x6cd0]        # 1004080d8 <__imp__impure_ptr>
+   100401408:	48 89 0a             	mov    QWORD PTR [rdx],rcx
+   10040140b:	48 89 70 40          	mov    QWORD PTR [rax+0x40],rsi
+   10040140f:	48 8d 35 2a fd ff ff 	lea    rsi,[rip+0xfffffffffffffd2a]        # 100401140 <cygwin_premain0>
+   100401416:	48 89 b0 80 00 00 00 	mov    QWORD PTR [rax+0x80],rsi
+   10040141d:	48 8d 35 2c fd ff ff 	lea    rsi,[rip+0xfffffffffffffd2c]        # 100401150 <cygwin_premain1>
+   100401424:	48 89 b0 88 00 00 00 	mov    QWORD PTR [rax+0x88],rsi
+   10040142b:	48 8d 35 2e fd ff ff 	lea    rsi,[rip+0xfffffffffffffd2e]        # 100401160 <cygwin_premain2>
+   100401432:	48 89 b0 90 00 00 00 	mov    QWORD PTR [rax+0x90],rsi
+   100401439:	48 8d 35 30 fd ff ff 	lea    rsi,[rip+0xfffffffffffffd30]        # 100401170 <cygwin_premain3>
+   100401440:	48 89 b0 98 00 00 00 	mov    QWORD PTR [rax+0x98],rsi
+   100401447:	48 8d 35 b2 5b 00 00 	lea    rsi,[rip+0x5bb2]        # 100407000 <__bss_start__>
+   10040144e:	48 89 70 38          	mov    QWORD PTR [rax+0x38],rsi
+   100401452:	48 c7 00 00 00 00 00 	mov    QWORD PTR [rax],0x0
+   100401459:	48 be 48 01 00 00 be 	movabs rsi,0xbbe00000148
+   100401460:	0b 00 00 
+   100401463:	48 89 70 08          	mov    QWORD PTR [rax+0x8],rsi
+   100401467:	c7 40 10 06 00 00 00 	mov    DWORD PTR [rax+0x10],0x6
+   10040146e:	48 8d 35 0b 02 00 00 	lea    rsi,[rip+0x20b]        # 100401680 <malloc>
+   100401475:	48 89 70 20          	mov    QWORD PTR [rax+0x20],rsi
+   100401479:	48 8d 0d f0 01 00 00 	lea    rcx,[rip+0x1f0]        # 100401670 <free>
+   100401480:	48 89 48 28          	mov    QWORD PTR [rax+0x28],rcx
+   100401484:	48 8d 35 15 02 00 00 	lea    rsi,[rip+0x215]        # 1004016a0 <realloc>
+   10040148b:	48 89 70 30          	mov    QWORD PTR [rax+0x30],rsi
+   10040148f:	48 8d 15 aa 01 00 00 	lea    rdx,[rip+0x1aa]        # 100401640 <calloc>
+   100401496:	48 89 50 78          	mov    QWORD PTR [rax+0x78],rdx
+   10040149a:	48 8d 0d ef 01 00 00 	lea    rcx,[rip+0x1ef]        # 100401690 <posix_memalign>
+   1004014a1:	48 89 88 18 01 00 00 	mov    QWORD PTR [rax+0x118],rcx
+   1004014a8:	48 85 c0             	test   rax,rax
+   1004014ab:	0f 84 ab fe ff ff    	je     10040135c <_cygwin_crt0_common+0x1dc>
+   1004014b1:	48 89 c3             	mov    rbx,rax
+   1004014b4:	48 8b 80 e0 00 00 00 	mov    rax,QWORD PTR [rax+0xe0]
+   1004014bb:	48 85 c0             	test   rax,rax
+   1004014be:	0f 85 c3 fd ff ff    	jne    100401287 <_cygwin_crt0_common+0x107>
+   1004014c4:	e9 93 fe ff ff       	jmp    10040135c <_cygwin_crt0_common+0x1dc>
+   1004014c9:	48 8b 10             	mov    rdx,QWORD PTR [rax]
+   1004014cc:	48 89 15 4d 0b 00 00 	mov    QWORD PTR [rip+0xb4d],rdx        # 100402020 <__cygwin_cxx_malloc>
+   1004014d3:	e9 cb fd ff ff       	jmp    1004012a3 <_cygwin_crt0_common+0x123>
+   1004014d8:	48 8b 50 38          	mov    rdx,QWORD PTR [rax+0x38]
+   1004014dc:	48 89 15 75 0b 00 00 	mov    QWORD PTR [rip+0xb75],rdx        # 100402058 <__cygwin_cxx_malloc+0x38>
+   1004014e3:	e9 1d fe ff ff       	jmp    100401305 <_cygwin_crt0_common+0x185>
+   1004014e8:	48 8b 50 30          	mov    rdx,QWORD PTR [rax+0x30]
+   1004014ec:	48 89 15 5d 0b 00 00 	mov    QWORD PTR [rip+0xb5d],rdx        # 100402050 <__cygwin_cxx_malloc+0x30>
+   1004014f3:	e9 ff fd ff ff       	jmp    1004012f7 <_cygwin_crt0_common+0x177>
+   1004014f8:	48 8b 50 28          	mov    rdx,QWORD PTR [rax+0x28]
+   1004014fc:	48 89 15 45 0b 00 00 	mov    QWORD PTR [rip+0xb45],rdx        # 100402048 <__cygwin_cxx_malloc+0x28>
+   100401503:	e9 e1 fd ff ff       	jmp    1004012e9 <_cygwin_crt0_common+0x169>
+   100401508:	48 8b 50 20          	mov    rdx,QWORD PTR [rax+0x20]
+   10040150c:	48 89 15 2d 0b 00 00 	mov    QWORD PTR [rip+0xb2d],rdx        # 100402040 <__cygwin_cxx_malloc+0x20>
+   100401513:	e9 c3 fd ff ff       	jmp    1004012db <_cygwin_crt0_common+0x15b>
+   100401518:	48 8b 50 18          	mov    rdx,QWORD PTR [rax+0x18]
+   10040151c:	48 89 15 15 0b 00 00 	mov    QWORD PTR [rip+0xb15],rdx        # 100402038 <__cygwin_cxx_malloc+0x18>
+   100401523:	e9 a5 fd ff ff       	jmp    1004012cd <_cygwin_crt0_common+0x14d>
+   100401528:	48 8b 50 10          	mov    rdx,QWORD PTR [rax+0x10]
+   10040152c:	48 89 15 fd 0a 00 00 	mov    QWORD PTR [rip+0xafd],rdx        # 100402030 <__cygwin_cxx_malloc+0x10>
+   100401533:	e9 87 fd ff ff       	jmp    1004012bf <_cygwin_crt0_common+0x13f>
+   100401538:	48 8b 50 08          	mov    rdx,QWORD PTR [rax+0x8]
+   10040153c:	48 89 15 e5 0a 00 00 	mov    QWORD PTR [rip+0xae5],rdx        # 100402028 <__cygwin_cxx_malloc+0x8>
+   100401543:	e9 69 fd ff ff       	jmp    1004012b1 <_cygwin_crt0_common+0x131>
+   100401548:	90                   	nop
+   100401549:	90                   	nop
+   10040154a:	90                   	nop
+   10040154b:	90                   	nop
+   10040154c:	90                   	nop
+   10040154d:	90                   	nop
+   10040154e:	90                   	nop
+   10040154f:	90                   	nop
+
+0000000100401550 <__dllMain>:
+   100401550:	4c 8b 05 c9 5a 00 00 	mov    r8,QWORD PTR [rip+0x5ac9]        # 100407020 <storedPtr>
+   100401557:	8b 15 cb 5a 00 00    	mov    edx,DWORD PTR [rip+0x5acb]        # 100407028 <storedReason>
+   10040155d:	48 8b 0d cc 5a 00 00 	mov    rcx,QWORD PTR [rip+0x5acc]        # 100407030 <storedHandle>
+   100401564:	e9 b7 00 00 00       	jmp    100401620 <DllMain>
+
+0000000100401569 <_cygwin_dll_entry>:
+   100401569:	48 83 ec 38          	sub    rsp,0x38
+   10040156d:	83 fa 02             	cmp    edx,0x2
+   100401570:	74 61                	je     1004015d3 <_cygwin_dll_entry+0x6a>
+   100401572:	77 4c                	ja     1004015c0 <_cygwin_dll_entry+0x57>
+   100401574:	85 d2                	test   edx,edx
+   100401576:	74 69                	je     1004015e1 <_cygwin_dll_entry+0x78>
+   100401578:	48 89 0d b1 5a 00 00 	mov    QWORD PTR [rip+0x5ab1],rcx        # 100407030 <storedHandle>
+   10040157f:	c7 05 9f 5a 00 00 01 	mov    DWORD PTR [rip+0x5a9f],0x1        # 100407028 <storedReason>
+   100401586:	00 00 00 
+   100401589:	4c 89 05 90 5a 00 00 	mov    QWORD PTR [rip+0x5a90],r8        # 100407020 <storedPtr>
+   100401590:	31 c0                	xor    eax,eax
+   100401592:	4d 85 c0             	test   r8,r8
+   100401595:	0f 94 c0             	sete   al
+   100401598:	89 05 72 5a 00 00    	mov    DWORD PTR [rip+0x5a72],eax        # 100407010 <__dynamically_loaded>
+   10040159e:	48 8d 15 ab ff ff ff 	lea    rdx,[rip+0xffffffffffffffab]        # 100401550 <__dllMain>
+   1004015a5:	e8 06 01 00 00       	call   1004016b0 <cygwin_attach_dll>
+   1004015aa:	48 89 05 67 5a 00 00 	mov    QWORD PTR [rip+0x5a67],rax        # 100407018 <dll_index>
+   1004015b1:	48 83 f8 ff          	cmp    rax,0xffffffffffffffff
+   1004015b5:	0f 95 c0             	setne  al
+   1004015b8:	0f b6 c0             	movzx  eax,al
+   1004015bb:	48 83 c4 38          	add    rsp,0x38
+   1004015bf:	c3                   	ret
+   1004015c0:	83 fa 03             	cmp    edx,0x3
+   1004015c3:	75 48                	jne    10040160d <_cygwin_dll_entry+0xa4>
+   1004015c5:	ba 03 00 00 00       	mov    edx,0x3
+   1004015ca:	48 83 c4 38          	add    rsp,0x38
+   1004015ce:	e9 4d 00 00 00       	jmp    100401620 <DllMain>
+   1004015d3:	ba 02 00 00 00       	mov    edx,0x2
+   1004015d8:	48 83 c4 38          	add    rsp,0x38
+   1004015dc:	e9 3f 00 00 00       	jmp    100401620 <DllMain>
+   1004015e1:	31 d2                	xor    edx,edx
+   1004015e3:	e8 38 00 00 00       	call   100401620 <DllMain>
+   1004015e8:	85 c0                	test   eax,eax
+   1004015ea:	74 cf                	je     1004015bb <_cygwin_dll_entry+0x52>
+   1004015ec:	89 44 24 2c          	mov    DWORD PTR [rsp+0x2c],eax
+   1004015f0:	48 8b 0d 21 5a 00 00 	mov    rcx,QWORD PTR [rip+0x5a21]        # 100407018 <dll_index>
+   1004015f7:	e8 54 00 00 00       	call   100401650 <cygwin_detach_dll>
+   1004015fc:	48 c7 05 11 5a 00 00 	mov    QWORD PTR [rip+0x5a11],0xffffffffffffffff        # 100407018 <dll_index>
+   100401603:	ff ff ff ff 
+   100401607:	8b 44 24 2c          	mov    eax,DWORD PTR [rsp+0x2c]
+   10040160b:	eb ae                	jmp    1004015bb <_cygwin_dll_entry+0x52>
+   10040160d:	b8 01 00 00 00       	mov    eax,0x1
+   100401612:	48 83 c4 38          	add    rsp,0x38
+   100401616:	c3                   	ret
+   100401617:	90                   	nop
+   100401618:	90                   	nop
+   100401619:	90                   	nop
+   10040161a:	90                   	nop
+   10040161b:	90                   	nop
+   10040161c:	90                   	nop
+   10040161d:	90                   	nop
+   10040161e:	90                   	nop
+   10040161f:	90                   	nop
+
+0000000100401620 <DllMain>:
+   100401620:	b8 01 00 00 00       	mov    eax,0x1
+   100401625:	c3                   	ret
+   100401626:	90                   	nop
+   100401627:	90                   	nop
+   100401628:	90                   	nop
+   100401629:	90                   	nop
+   10040162a:	90                   	nop
+   10040162b:	90                   	nop
+   10040162c:	90                   	nop
+   10040162d:	90                   	nop
+   10040162e:	90                   	nop
+   10040162f:	90                   	nop
+
+0000000100401630 <_pei386_runtime_relocator>:
+   100401630:	c3                   	ret
+   100401631:	90                   	nop
+   100401632:	90                   	nop
+   100401633:	90                   	nop
+   100401634:	90                   	nop
+   100401635:	90                   	nop
+   100401636:	90                   	nop
+   100401637:	90                   	nop
+   100401638:	90                   	nop
+   100401639:	90                   	nop
+   10040163a:	90                   	nop
+   10040163b:	90                   	nop
+   10040163c:	90                   	nop
+   10040163d:	90                   	nop
+   10040163e:	90                   	nop
+   10040163f:	90                   	nop
+
+0000000100401640 <calloc>:
+   100401640:	ff 25 9a 6a 00 00    	jmp    QWORD PTR [rip+0x6a9a]        # 1004080e0 <__imp_calloc>
+   100401646:	90                   	nop
+   100401647:	90                   	nop
+   100401648:	90                   	nop
+   100401649:	90                   	nop
+   10040164a:	90                   	nop
+   10040164b:	90                   	nop
+   10040164c:	90                   	nop
+   10040164d:	90                   	nop
+   10040164e:	90                   	nop
+   10040164f:	90                   	nop
+
+0000000100401650 <cygwin_detach_dll>:
+   100401650:	ff 25 92 6a 00 00    	jmp    QWORD PTR [rip+0x6a92]        # 1004080e8 <__imp_cygwin_detach_dll>
+   100401656:	90                   	nop
+   100401657:	90                   	nop
+   100401658:	90                   	nop
+   100401659:	90                   	nop
+   10040165a:	90                   	nop
+   10040165b:	90                   	nop
+   10040165c:	90                   	nop
+   10040165d:	90                   	nop
+   10040165e:	90                   	nop
+   10040165f:	90                   	nop
+
+0000000100401660 <cygwin_internal>:
+   100401660:	ff 25 8a 6a 00 00    	jmp    QWORD PTR [rip+0x6a8a]        # 1004080f0 <__imp_cygwin_internal>
+   100401666:	90                   	nop
+   100401667:	90                   	nop
+   100401668:	90                   	nop
+   100401669:	90                   	nop
+   10040166a:	90                   	nop
+   10040166b:	90                   	nop
+   10040166c:	90                   	nop
+   10040166d:	90                   	nop
+   10040166e:	90                   	nop
+   10040166f:	90                   	nop
+
+0000000100401670 <free>:
+   100401670:	ff 25 8a 6a 00 00    	jmp    QWORD PTR [rip+0x6a8a]        # 100408100 <__imp_free>
+   100401676:	90                   	nop
+   100401677:	90                   	nop
+   100401678:	90                   	nop
+   100401679:	90                   	nop
+   10040167a:	90                   	nop
+   10040167b:	90                   	nop
+   10040167c:	90                   	nop
+   10040167d:	90                   	nop
+   10040167e:	90                   	nop
+   10040167f:	90                   	nop
+
+0000000100401680 <malloc>:
+   100401680:	ff 25 82 6a 00 00    	jmp    QWORD PTR [rip+0x6a82]        # 100408108 <__imp_malloc>
+   100401686:	90                   	nop
+   100401687:	90                   	nop
+   100401688:	90                   	nop
+   100401689:	90                   	nop
+   10040168a:	90                   	nop
+   10040168b:	90                   	nop
+   10040168c:	90                   	nop
+   10040168d:	90                   	nop
+   10040168e:	90                   	nop
+   10040168f:	90                   	nop
+
+0000000100401690 <posix_memalign>:
+   100401690:	ff 25 7a 6a 00 00    	jmp    QWORD PTR [rip+0x6a7a]        # 100408110 <__imp_posix_memalign>
+   100401696:	90                   	nop
+   100401697:	90                   	nop
+   100401698:	90                   	nop
+   100401699:	90                   	nop
+   10040169a:	90                   	nop
+   10040169b:	90                   	nop
+   10040169c:	90                   	nop
+   10040169d:	90                   	nop
+   10040169e:	90                   	nop
+   10040169f:	90                   	nop
+
+00000001004016a0 <realloc>:
+   1004016a0:	ff 25 7a 6a 00 00    	jmp    QWORD PTR [rip+0x6a7a]        # 100408120 <__imp_realloc>
+   1004016a6:	90                   	nop
+   1004016a7:	90                   	nop
+   1004016a8:	90                   	nop
+   1004016a9:	90                   	nop
+   1004016aa:	90                   	nop
+   1004016ab:	90                   	nop
+   1004016ac:	90                   	nop
+   1004016ad:	90                   	nop
+   1004016ae:	90                   	nop
+   1004016af:	90                   	nop
+
+00000001004016b0 <cygwin_attach_dll>:
+   1004016b0:	56                   	push   rsi
+   1004016b1:	53                   	push   rbx
+   1004016b2:	48 83 ec 28          	sub    rsp,0x28
+   1004016b6:	48 89 cb             	mov    rbx,rcx
+   1004016b9:	48 89 d1             	mov    rcx,rdx
+   1004016bc:	48 8d 35 7d 59 00 00 	lea    rsi,[rip+0x597d]        # 100407040 <u.0>
+   1004016c3:	48 89 f2             	mov    rdx,rsi
+   1004016c6:	e8 b5 fa ff ff       	call   100401180 <_cygwin_crt0_common>
+   1004016cb:	48 89 f2             	mov    rdx,rsi
+   1004016ce:	48 89 d9             	mov    rcx,rbx
+   1004016d1:	48 83 c4 28          	add    rsp,0x28
+   1004016d5:	5b                   	pop    rbx
+   1004016d6:	5e                   	pop    rsi
+   1004016d7:	e9 04 00 00 00       	jmp    1004016e0 <dll_dllcrt0>
+   1004016dc:	90                   	nop
+   1004016dd:	90                   	nop
+   1004016de:	90                   	nop
+   1004016df:	90                   	nop
+
+00000001004016e0 <dll_dllcrt0>:
+   1004016e0:	ff 25 12 6a 00 00    	jmp    QWORD PTR [rip+0x6a12]        # 1004080f8 <__imp_dll_dllcrt0>
+   1004016e6:	90                   	nop
+   1004016e7:	90                   	nop
+   1004016e8:	90                   	nop
+   1004016e9:	90                   	nop
+   1004016ea:	90                   	nop
+   1004016eb:	90                   	nop
+   1004016ec:	90                   	nop
+   1004016ed:	90                   	nop
+   1004016ee:	90                   	nop
+   1004016ef:	90                   	nop
+
+00000001004016f0 <GetModuleHandleA>:
+   1004016f0:	ff 25 3a 6a 00 00    	jmp    QWORD PTR [rip+0x6a3a]        # 100408130 <__imp_GetModuleHandleA>
+   1004016f6:	90                   	nop
+   1004016f7:	90                   	nop
+   1004016f8:	0f 1f 84 00 00 00 00 	nop    DWORD PTR [rax+rax*1+0x0]
+   1004016ff:	00 
+
+0000000100401700 <register_frame_ctor>:
+   100401700:	e9 4b f9 ff ff       	jmp    100401050 <__gcc_register_frame>
+   100401705:	90                   	nop
+   100401706:	90                   	nop
+   100401707:	90                   	nop
+   100401708:	90                   	nop
+   100401709:	90                   	nop
+   10040170a:	90                   	nop
+   10040170b:	90                   	nop
+   10040170c:	90                   	nop
+   10040170d:	90                   	nop
+   10040170e:	90                   	nop
+   10040170f:	90                   	nop

@@ -1,0 +1,87 @@
+Microsoft (R) Macro Assembler Version 5.10                  10/21/26 17:26:0
+                                                             Page     1-1
+
+
+				; MASM 5.0 / 8086 DOS. Two rows, 13 lowercase l
+				etters per row.
+				.MODEL SMALL
+				.STACK 100H
+				.CODE
+ 0000				START:
+ 0000  B3 61			    MOV BL,'a'           ; Next letter; INT 21H
+				/AH=02H takes DL.
+ 0002  B9 0002			    MOV CX,2             ; Outer LOOP counter: 
+				two rows.
+ 0005				ROW_LOOP:
+ 0005  51			    PUSH CX              ; Save outer count bef
+				ore reusing CX.
+ 0006  B9 000D			    MOV CX,13            ; Inner LOOP counter: 
+				13 letters.
+ 0009				COL_LOOP:
+ 0009  8A D3			    MOV DL,BL
+ 000B  B4 02			    MOV AH,02H
+ 000D  CD 21			    INT 21H
+ 000F  FE C3			    INC BL
+ 0011  83 F9 01			    CMP CX,1             ; Last column has no t
+				railing space.
+ 0014  74 06			    JE NO_SPACE
+ 0016  B2 20			    MOV DL,' '
+ 0018  B4 02			    MOV AH,02H
+ 001A  CD 21			    INT 21H
+ 001C				NO_SPACE:
+ 001C  E2 EB			    LOOP COL_LOOP        ; CX = CX - 1; jump wh
+				en CX != 0.
+ 001E  B2 0D			    MOV DL,0DH           ; DOS line ending: CR 
+				followed by LF.
+ 0020  B4 02			    MOV AH,02H
+ 0022  CD 21			    INT 21H
+ 0024  B2 0A			    MOV DL,0AH
+ 0026  B4 02			    MOV AH,02H
+ 0028  CD 21			    INT 21H
+ 002A  59			    POP CX               ; Restore outer count 
+				before outer LOOP.
+ 002B  E2 D8			    LOOP ROW_LOOP
+ 002D  B8 4C00			    MOV AX,4C00H
+ 0030  CD 21			    INT 21H
+				END START
+Microsoft (R) Macro Assembler Version 5.10                  10/21/26 17:26:0
+                                                             Symbols-1
+
+
+Segments and Groups:
+
+                N a m e         	Length	 Align	Combine Class
+
+DGROUP . . . . . . . . . . . . .  	GROUP
+  _DATA  . . . . . . . . . . . .  	0000	WORD	PUBLIC	'DATA'
+  STACK  . . . . . . . . . . . .  	0100	PARA	STACK	'STACK'
+_TEXT  . . . . . . . . . . . . .  	0032	WORD	PUBLIC	'CODE'
+
+Symbols:            
+
+                N a m e         	Type	 Value	 Attr
+
+COL_LOOP . . . . . . . . . . . .  	L NEAR	0009	_TEXT
+
+NO_SPACE . . . . . . . . . . . .  	L NEAR	001C	_TEXT
+
+ROW_LOOP . . . . . . . . . . . .  	L NEAR	0005	_TEXT
+
+START  . . . . . . . . . . . . .  	L NEAR	0000	_TEXT
+
+@CODE  . . . . . . . . . . . . .  	TEXT  _TEXT		
+@CODESIZE  . . . . . . . . . . .  	TEXT  0		
+@CPU . . . . . . . . . . . . . .  	TEXT  0101h		
+@DATASIZE  . . . . . . . . . . .  	TEXT  0		
+@FILENAME  . . . . . . . . . . .  	TEXT  LOOP13		
+@VERSION . . . . . . . . . . . .  	TEXT  510		
+
+
+     33 Source  Lines
+     33 Total   Lines
+     21 Symbols
+
+  47986 + 463353 Bytes symbol space free
+
+      0 Warning Errors
+      0 Severe  Errors

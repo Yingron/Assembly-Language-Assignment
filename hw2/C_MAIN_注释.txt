@@ -1,0 +1,64 @@
+C main 函数的真实反汇编与逐条注释
+Cygwin GCC x86-64, -O0 -g; objdump -d -S -Mintel.
+此文件不是 8086 DOS 反汇编。
+
+   100401080:	55                   	push   rbp
+    ; 保存调用者的栈帧基址
+   100401081:	48 89 e5             	mov    rbp,rsp
+    ; 为 main 建立栈帧
+   100401084:	48 83 ec 30          	sub    rsp,0x30
+    ; 预留局部变量及调用所需的栈空间
+   100401088:	e8 73 00 00 00       	call   100401100 <__main>
+    ; 编译器插入的运行时初始化
+   10040108d:	c7 45 fc 61 00 00 00 	mov    DWORD PTR [rbp-0x4],0x61
+    ; ch='a'，ASCII 61H
+   100401094:	c7 45 f8 00 00 00 00 	mov    DWORD PTR [rbp-0x8],0x0
+    ; row=0
+   10040109b:	eb 3f                	jmp    1004010dc <main+0x5c>
+    ; 先检查外层循环条件
+   10040109d:	c7 45 f4 00 00 00 00 	mov    DWORD PTR [rbp-0xc],0x0
+    ; 每一行开始时 col=0
+   1004010a4:	eb 22                	jmp    1004010c8 <main+0x48>
+    ; 先检查内层循环条件
+   1004010a6:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+    ; 从局部变量读取 ch
+   1004010a9:	89 c1                	mov    ecx,eax
+    ; 将 ch 放入本次调用的首个整数参数寄存器
+   1004010ab:	e8 60 00 00 00       	call   100401110 <putchar>
+    ; 调用 C 库输出字符，不是 INT 21H
+   1004010b0:	83 45 fc 01          	add    DWORD PTR [rbp-0x4],0x1
+    ; ++ch，准备下一个小写字母
+   1004010b4:	83 7d f4 0b          	cmp    DWORD PTR [rbp-0xc],0xb
+    ; 比较 col 与 11，即检查 col<12
+   1004010b8:	7f 0a                	jg     1004010c4 <main+0x44>
+    ; 若 col>11，跳过空格输出
+   1004010ba:	b9 20 00 00 00       	mov    ecx,0x20
+    ; 首个参数设为 ASCII 空格 20H
+   1004010bf:	e8 4c 00 00 00       	call   100401110 <putchar>
+    ; 输出字母间的空格
+   1004010c4:	83 45 f4 01          	add    DWORD PTR [rbp-0xc],0x1
+    ; ++col
+   1004010c8:	83 7d f4 0c          	cmp    DWORD PTR [rbp-0xc],0xc
+    ; 比较 col 与 12
+   1004010cc:	7e d8                	jle    1004010a6 <main+0x26>
+    ; col<=12 等价于 col<13，继续内层循环
+   1004010ce:	b9 0a 00 00 00       	mov    ecx,0xa
+    ; 输出换行字符 '\n'，值为 0AH
+   1004010d3:	e8 38 00 00 00       	call   100401110 <putchar>
+    ; 输出一行后的换行
+   1004010d8:	83 45 f8 01          	add    DWORD PTR [rbp-0x8],0x1
+    ; ++row
+   1004010dc:	83 7d f8 01          	cmp    DWORD PTR [rbp-0x8],0x1
+    ; 比较 row 与 1
+   1004010e0:	7e bb                	jle    10040109d <main+0x1d>
+    ; row<=1 等价于 row<2，继续外层循环
+   1004010e2:	b8 00 00 00 00       	mov    eax,0x0
+    ; main 的返回值为 0
+   1004010e7:	48 83 c4 30          	add    rsp,0x30
+    ; 回收本函数预留的栈空间
+   1004010eb:	5d                   	pop    rbp
+    ; 恢复调用者的栈帧基址
+   1004010ec:	c3                   	ret
+    ; 返回调用者，由运行库完成进程结束
+   1004010ed:	90                   	nop
+    ; 以下 NOP 是对齐填充

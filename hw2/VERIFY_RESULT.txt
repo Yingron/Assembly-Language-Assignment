@@ -1,0 +1,2 @@
+PASS: HW2; two DOS programs; exact a-z output; 13 letters per row; exit 0.
+PASS: C ASCII output matches; actual main disassembly annotated.

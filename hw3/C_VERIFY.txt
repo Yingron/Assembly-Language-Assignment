@@ -1,0 +1,1 @@
+PASS: default 5050; n=1..100; six invalid arguments rejected.

@@ -1,0 +1,210 @@
+Microsoft (R) Macro Assembler Version 5.10                  10/21/26 17:26:0
+                                                             Page     1-1
+
+
+				.8086
+				.MODEL SMALL
+				.STACK 100h
+				.DATA
+ 0000  000A			Base dw 10
+ 0002  0003			MaxDigits dw 3
+ 0004  0064			Limit dw 100
+ 0006  51 00			InBuf db 81,0,81 dup(0)
+       0051[			
+	   00			
+			 ]	
+				
+				
+				.CODE
+ 0000				main PROC
+ 0000  B8 ---- R		    mov ax,@data
+ 0003  8E D8			    mov ds,ax
+				    ; Stack local [BP-2] stores the running sum
+				 throughout the loop.
+ 0005  55			    push bp
+ 0006  8B EC			    mov bp,sp
+ 0008  83 EC 02			    sub sp,2
+ 000B  C7 46 FE 0000		    mov WORD PTR [bp-2],0
+ 0010  BB 0001			    mov bx,1
+ 0013  B9 0064			    mov cx,100
+ 0016				SumLoop:
+ 0016  01 5E FE			    add WORD PTR [bp-2],bx
+ 0019  43			    inc bx
+ 001A  E2 FA			    loop SumLoop
+ 001C  8B 46 FE			    mov ax,[bp-2]
+ 001F  8B E5			    mov sp,bp
+ 0021  5D			    pop bp
+ 0022  E8 0093 R		    call PrintDec
+ 0025  E8 00B5 R		    call NewLine
+ 0028  B8 4C00			    mov ax,4C00h
+ 002B  CD 21			    int 21h
+ 002D				main ENDP
+				INCLUDE IO.INC
+			     C	; DOS 21h/0Ah: input line; 09h: string; 02h: ch
+				aracter.
+			     C	; ReadNumber: AX=value, CF=0 on success; CF=1 o
+				n invalid input.
+ 002D                        C	ReadNumber PROC NEAR
+ 002D  BA 0006 R             C	    mov dx,OFFSET InBuf
+ 0030  B4 0A                 C	    mov ah,0Ah
+ 0032  CD 21                 C	    int 21h
+ 0034  E8 00B5 R             C	    call NewLine
+ 0037  33 C9                 C	    xor cx,cx
+ 0039  8A 0E 0007 R          C	    mov cl,InBuf+1
+ 003D  E3 52                 C	    jcxz RNBad
+ 003F  3B 0E 0002 R          C	    cmp cx,MaxDigits
+ 0043  77 4C                 C	    ja RNBad
+ 0045  BE 0008 R             C	    mov si,OFFSET InBuf+2
+ 0048  33 DB                 C	    xor bx,bx
+Microsoft (R) Macro Assembler Version 5.10                  10/21/26 17:26:0
+                                                             Page     1-2
+
+
+ 004A                        C	RNLoop:
+ 004A  8A 04                 C	    mov al,[si]
+ 004C  3C 30                 C	    cmp al,'0'
+ 004E  72 41                 C	    jb RNBad
+ 0050  3C 39                 C	    cmp al,'9'
+ 0052  76 14                 C	    jbe RNDigit
+ 0054  3C 41                 C	    cmp al,'A'
+ 0056  72 39                 C	    jb RNBad
+ 0058  3C 46                 C	    cmp al,'F'
+ 005A  76 0A                 C	    jbe RNUpper
+ 005C  3C 61                 C	    cmp al,'a'
+ 005E  72 31                 C	    jb RNBad
+ 0060  3C 66                 C	    cmp al,'f'
+ 0062  77 2D                 C	    ja RNBad
+ 0064  2C 20                 C	    sub al,20h
+ 0066                        C	RNUpper:
+ 0066  2C 07                 C	    sub al,7
+ 0068                        C	RNDigit:
+ 0068  2C 30                 C	    sub al,'0'
+ 006A  32 E4                 C	    xor ah,ah
+ 006C  3B 06 0000 R          C	    cmp ax,Base
+ 0070  73 1F                 C	    jae RNBad
+ 0072  8B F8                 C	    mov di,ax
+ 0074  8B C3                 C	    mov ax,bx
+ 0076  F7 26 0000 R          C	    mul Base
+ 007A  0B D2                 C	    or dx,dx
+ 007C  75 13                 C	    jnz RNBad
+ 007E  03 C7                 C	    add ax,di
+ 0080  72 0F                 C	    jc RNBad
+ 0082  3B 06 0004 R          C	    cmp ax,Limit
+ 0086  77 09                 C	    ja RNBad
+ 0088  8B D8                 C	    mov bx,ax
+ 008A  46                    C	    inc si
+ 008B  E2 BD                 C	    loop RNLoop
+ 008D  8B C3                 C	    mov ax,bx
+ 008F  F8                    C	    clc
+ 0090  C3                    C	    ret
+ 0091                        C	RNBad:
+ 0091  F9                    C	    stc
+ 0092  C3                    C	    ret
+ 0093                        C	ReadNumber ENDP
+			     C	
+			     C	; AX unsigned -> decimal. DIV DX:AX / 10; remai
+				nders on stack.
+ 0093                        C	PrintDec PROC NEAR
+ 0093  50                    C	    push ax
+ 0094  53                    C	    push bx
+ 0095  51                    C	    push cx
+ 0096  52                    C	    push dx
+ 0097  33 C9                 C	    xor cx,cx
+ 0099  BB 000A               C	    mov bx,10
+ 009C                        C	PDLoop:
+ 009C  33 D2                 C	    xor dx,dx
+ 009E  F7 F3                 C	    div bx
+Microsoft (R) Macro Assembler Version 5.10                  10/21/26 17:26:0
+                                                             Page     1-3
+
+
+ 00A0  52                    C	    push dx
+ 00A1  41                    C	    inc cx
+ 00A2  0B C0                 C	    or ax,ax
+ 00A4  75 F6                 C	    jnz PDLoop
+ 00A6                        C	PDOut:
+ 00A6  5A                    C	    pop dx
+ 00A7  80 C2 30              C	    add dl,'0'
+ 00AA  B4 02                 C	    mov ah,02h
+ 00AC  CD 21                 C	    int 21h
+ 00AE  E2 F6                 C	    loop PDOut
+ 00B0  5A                    C	    pop dx
+ 00B1  59                    C	    pop cx
+ 00B2  5B                    C	    pop bx
+ 00B3  58                    C	    pop ax
+ 00B4  C3                    C	    ret
+ 00B5                        C	PrintDec ENDP
+			     C	
+ 00B5                        C	NewLine PROC NEAR
+ 00B5  50                    C	    push ax
+ 00B6  52                    C	    push dx
+ 00B7  B2 0D                 C	    mov dl,13
+ 00B9  B4 02                 C	    mov ah,02h
+ 00BB  CD 21                 C	    int 21h
+ 00BD  B2 0A                 C	    mov dl,10
+ 00BF  CD 21                 C	    int 21h
+ 00C1  5A                    C	    pop dx
+ 00C2  58                    C	    pop ax
+ 00C3  C3                    C	    ret
+ 00C4                        C	NewLine ENDP
+				END main
+Microsoft (R) Macro Assembler Version 5.10                  10/21/26 17:26:0
+                                                             Symbols-1
+
+
+Segments and Groups:
+
+                N a m e         	Length	 Align	Combine Class
+
+DGROUP . . . . . . . . . . . . .  	GROUP
+  _DATA  . . . . . . . . . . . .  	0059	WORD	PUBLIC	'DATA'
+  STACK  . . . . . . . . . . . .  	0100	PARA	STACK	'STACK'
+_TEXT  . . . . . . . . . . . . .  	00C4	WORD	PUBLIC	'CODE'
+
+Symbols:            
+
+                N a m e         	Type	 Value	 Attr
+
+BASE . . . . . . . . . . . . . .  	L WORD	0000	_DATA
+
+INBUF  . . . . . . . . . . . . .  	L BYTE	0006	_DATA
+
+LIMIT  . . . . . . . . . . . . .  	L WORD	0004	_DATA
+
+MAIN . . . . . . . . . . . . . .  	N PROC	0000	_TEXT	Length = 002D
+MAXDIGITS  . . . . . . . . . . .  	L WORD	0002	_DATA
+
+NEWLINE  . . . . . . . . . . . .  	N PROC	00B5	_TEXT	Length = 000F
+
+PDLOOP . . . . . . . . . . . . .  	L NEAR	009C	_TEXT
+PDOUT  . . . . . . . . . . . . .  	L NEAR	00A6	_TEXT
+PRINTDEC . . . . . . . . . . . .  	N PROC	0093	_TEXT	Length = 0022
+
+READNUMBER . . . . . . . . . . .  	N PROC	002D	_TEXT	Length = 0066
+RNBAD  . . . . . . . . . . . . .  	L NEAR	0091	_TEXT
+RNDIGIT  . . . . . . . . . . . .  	L NEAR	0068	_TEXT
+RNLOOP . . . . . . . . . . . . .  	L NEAR	004A	_TEXT
+RNUPPER  . . . . . . . . . . . .  	L NEAR	0066	_TEXT
+
+SUMLOOP  . . . . . . . . . . . .  	L NEAR	0016	_TEXT
+
+@CODE  . . . . . . . . . . . . .  	TEXT  _TEXT		
+@CODESIZE  . . . . . . . . . . .  	TEXT  0		
+@CPU . . . . . . . . . . . . . .  	TEXT  257		
+@DATASIZE  . . . . . . . . . . .  	TEXT  0		
+@FILENAME  . . . . . . . . . . .  	TEXT  SUMSTK		
+@VERSION . . . . . . . . . . . .  	TEXT  510		
+
+Microsoft (R) Macro Assembler Version 5.10                  10/21/26 17:26:0
+                                                             Symbols-2
+
+
+
+    130 Source  Lines
+    130 Total   Lines
+     32 Symbols
+
+  47736 + 459505 Bytes symbol space free
+
+      0 Warning Errors
+      0 Severe  Errors

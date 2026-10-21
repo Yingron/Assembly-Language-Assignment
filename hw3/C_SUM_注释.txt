@@ -1,0 +1,40 @@
+C 求和函数的真实反汇编与逐条注释
+环境：Cygwin GCC，x86-64，-O0 -g，objdump -d -S -Mintel。
+这是本次 SUM_C.exe 的实际机器码，不是 8086 或 16 位 DOS 反汇编。
+sum_to 的参数与局部变量均为 unsigned int；此编译器下占 32 位。
+源码与 main 的完整反汇编见 C_FULL_DISASM.txt。
+
+   100401080:	55                   	push   rbp
+    ; 保存调用者的帧指针 RBP。
+   100401081:	48 89 e5             	mov    rbp,rsp
+    ; 建立当前函数的栈帧。
+   100401084:	48 83 ec 10          	sub    rsp,0x10
+    ; 在栈中分配 16 字节局部空间。
+   100401088:	89 4d 10             	mov    DWORD PTR [rbp+0x10],ecx
+    ; 保存参数 n；本机 Cygwin x86-64 调用约定通过 ECX 传入它。
+   10040108b:	c7 45 fc 00 00 00 00 	mov    DWORD PTR [rbp-0x4],0x0
+    ; total=0，保存在 [RBP-4]，占 4 字节。
+   100401092:	c7 45 f8 01 00 00 00 	mov    DWORD PTR [rbp-0x8],0x1
+    ; i=1，保存在 [RBP-8]，占 4 字节。
+   100401099:	eb 0a                	jmp    1004010a5 <sum_to+0x25>
+    ; 先跳到循环条件检查处，体现 for 循环先判断再执行。
+   10040109b:	8b 45 f8             	mov    eax,DWORD PTR [rbp-0x8]
+    ; 将当前 i 读入 EAX。
+   10040109e:	01 45 fc             	add    DWORD PTR [rbp-0x4],eax
+    ; 执行 total += i，将结果写回栈中的 total。
+   1004010a1:	83 45 f8 01          	add    DWORD PTR [rbp-0x8],0x1
+    ; 执行 ++i。
+   1004010a5:	8b 45 f8             	mov    eax,DWORD PTR [rbp-0x8]
+    ; 将 i 读入 EAX，准备比较。
+   1004010a8:	39 45 10             	cmp    DWORD PTR [rbp+0x10],eax
+    ; 比较 n 与 i，计算 n-i 并设置标志位。
+   1004010ab:	73 ee                	jae    10040109b <sum_to+0x1b>
+    ; JAE 按无符号数判断 n>=i 时继续循环。
+   1004010ad:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+    ; 将 total 放入返回值寄存器 EAX。
+   1004010b0:	48 83 c4 10          	add    rsp,0x10
+    ; 释放局部变量空间。
+   1004010b4:	5d                   	pop    rbp
+    ; 恢复调用者的 RBP。
+   1004010b5:	c3                   	ret
+    ; 返回调用处。

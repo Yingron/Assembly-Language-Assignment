@@ -1,6 +1,9 @@
 * text=auto
-*.ASM text eol=crlf
-*.INC text eol=crlf
+# Keep source hashes identical to the files used for compilation.
+*.ASM -text
+*.INC -text
+*.c -text
+*.C -text
 *.BAT text eol=crlf
 *.DBG text eol=crlf
 *.ps1 text eol=crlf
@@ -17,3 +20,4 @@
 /hw1/OFFSET.TXT -text
 /hw2/LOOP13.TXT -text
 /hw2/JUMP13.TXT -text
+/hw2/C_OUTPUT.TXT -text

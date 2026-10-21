@@ -1,1 +1,0 @@
-PASS: 641 DOS cases; 6 programs assembled and linked.

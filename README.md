@@ -1,50 +1,58 @@
 # 汇编语言作业
 
-三个作业的源码、DOS 可执行文件、实验说明、实际运行结果和反汇编记录。题目截图见 [requirements](requirements/)。
+本仓库按作业 1～3 分目录提交，保留源码、可执行文件、实验说明和必要反汇编记录。
 
 ## 作业 1：Hello World
 
-目录：[hw1](hw1/)，报告：[实验说明](hw1/实验说明.md)。
+[实验说明](hw1/实验说明.md) 包含环境搭建、程序结构、常用寄存器及 DEBUG 直接写内存实验步骤。
 
-- 常规方式：`HELLO.ASM` → MASM → LINK → `HELLO.EXE`。
-- 对比版本：`HELLO2.ASM` 使用 `MOV DX,OFFSET Hello`。
-- 直接写内存：`RAW.DBG` 用 DEBUG 的 `e` 命令写机器码与字符串，再执行；完整现场见 `RAW.LOG`。
-- `INSPECT.LOG` 保留 `u` 反汇编、`t` 单步、寄存器与内存变化；报告说明程序结构、段地址、寄存器和 DOS 服务。
+- `HELLO.ASM`、`HELLO.EXE`：常规 Hello World。
+- `HELLO2.ASM`、`HELLO2.EXE`：使用 OFFSET 的对比版本。
+- `RAW.DBG`、`RAW.LOG`：直接写入机器码与字符串的 DEBUG 命令及执行记录。
+- `INSPECT.LOG`、`INSPECT2.LOG`：EXE 反汇编、寄存器与正常退出记录。
 
 ## 作业 2：ASCII 小写字母
 
-目录：[hw2](hw2/)，报告：[作业说明](hw2/作业说明.md)。
+[作业说明](hw2/作业说明.md) 解释每行 13 个字母的实现。
 
-- `LOOP13.ASM/EXE`：双重 LOOP，使用 PUSH/POP 保存并恢复外层 CX。
-- `JUMP13.ASM/EXE`：条件跳转实现两行输出，每行 13 个字母。
-- `ASCII13.c`、`C_FULL_DISASM.txt`、`C_MAIN_注释.txt`：C 实现、真实反汇编及逐条注释。
+- `LOOP13.ASM/EXE`：双重 LOOP，保存并恢复外层 CX。
+- `JUMP13.ASM/EXE`：条件跳转循环。
+- `ASCII13.c`、`ASCII13_C.exe`：C 实现。
+- `C_FULL_DISASM.txt`、`C_MAIN_注释.txt`：C 完整反汇编及 main 函数逐条注释。
 
 ## 作业 3：求和与进制转换
 
-目录：[hw3](hw3/)，报告：[作业说明](hw3/作业说明.md)。
+[作业说明](hw3/作业说明.md) 解释数值范围、输入及十进制输出方法。
 
-- `SUMREG`、`SUMMEM`、`SUMSTK`：分别在寄存器、数据段、栈中累加 1～100，输出 5050。
-- `SUMIN`：输入 n（1～100），计算 1+2+…+n，输出十进制结果。
-- `H2D`：输入 1～2 位十六进制数，输出十进制；`D2H` 完成 0～255 的反向转换。
-- `SUM.C`、`C_FULL_DISASM.txt`、`C_SUM_注释.txt`：C 求和、真实反汇编及注释。
-- `IO.INC` 是公共输入输出代码，编译时必须保留。
+- `SUMREG`、`SUMMEM`、`SUMSTK` 的 ASM/EXE：分别在寄存器、数据段、栈中累加 1～100，输出 5050。
+- `SUMIN.ASM/EXE`：输入 n（1～100），计算 1+2+…+n。
+- `H2D.ASM/EXE`、`D2H.ASM/EXE`：0～255 范围内的双向进制转换。
+- `IO.INC`：汇编程序共用的输入输出代码，编译时必需。
+- `SUM.C`、`SUM_C.exe`：C 求和；`C_FULL_DISASM.txt`、`C_SUM_注释.txt` 为真实反汇编及注释。
 
-## 运行与复现
+## 运行与编译
 
-DOS EXE 在 DOSBox 中运行。Windows 安装 DOSBox 0.74，并按 [工具说明](tools/README.md) 配置 tools。各目录的“运行实验.cmd”启动演示，“重新验证.cmd”重新编译并验证。工具安装包、编辑器和运行库不作为作业文件上传。
+汇编 EXE 在 DOSBox 中运行。使用 DOSBox 0.74，将仓库目录挂载为 C 盘，并将包含 MASM、LINK、DEBUG 的工具目录挂载为 T 盘（工具需自行配置）：
 
-在仓库根目录使用 PowerShell：
-
-```powershell
-.\Run-Lab.ps1 -Homework 1 -Verify
-.\Run-Lab.ps1 -Homework 2 -Verify
-.\Run-Lab.ps1 -Homework 3 -Verify
-.\hw2\Build-C.ps1
-.\hw3\Build-C.ps1
+```dos
+mount c "仓库完整路径"
+mount t "汇编工具目录"
+c:
+set PATH=T:\
+cd HW1
+HELLO
+DEBUG < RAW.DBG
 ```
 
-后两条命令需要 Cygwin（默认 `C:\cygwin64`，含 GCC 和 objdump）及 Python 3。C EXE 依赖 Cygwin 运行库，在 Windows 环境运行；两份 C 反汇编是 **x86-64**，与手写 **8086 DOS** 代码分别标明。题图没有限定 C 编译器；如课程另行限定 16 位 C 编译器，需要按该限定重新生成 C 反汇编。
+将目录切换为 `C:\HW2` 或 `C:\HW3`，即可运行对应作业的 EXE。重新编译示例（在对应作业目录中）：
 
-## 验证
+```dos
+masm HELLO.ASM;
+link HELLO.OBJ;
+```
 
-本次提交于 2026-10-21 重新编译和运行，详情见 [验证记录](VERIFICATION.md)。共验证 10 个 DOS EXE，作业 3 的 641 个测试全部通过，两个 C 程序均完成运行及实际反汇编检查。提交保留构建日志、列表和运行结果；批量测试输出可由脚本重新生成。
+作业 3 编译时须保证 `IO.INC` 与 ASM 位于同一目录。各报告保留了具体命令和结果说明。
+
+C EXE 在 Windows 的 Cygwin 环境运行，依赖 Cygwin 运行库。两份 C 反汇编为 **x86-64**；手写汇编为 **8086 DOS**。题目未限定 C 编译器，如课程另行要求 16 位 C 反汇编，应使用对应编译器重新生成。
+
+2026-10-21 的提交前验证中，10 个 DOS 程序及两个 C 程序均通过检查，作业 3 共通过 641 个 DOS 用例。精简版保留必要反汇编记录，批量测试材料和自动化脚本可在 Git 历史中的精简前版本查阅。

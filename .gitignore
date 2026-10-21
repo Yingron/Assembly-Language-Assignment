@@ -1,12 +1,10 @@
-# Local tool installations are supplied separately.
-/tools/*.EXE
-/tools/*.COM
+# Locally generated build and runtime files.
 *.OBJ
 *.CRF
 *.REF
+*.LST
+*.MAP
 VERIFY.OK
 stdout.txt
 stderr.txt
-/hw3/TESTS/O*.TXT
-/hw3/TESTS/S*.TXT
 __pycache__/

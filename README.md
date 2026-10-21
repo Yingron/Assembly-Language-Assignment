@@ -43,8 +43,5 @@ DOS EXE 在 DOSBox 中运行。Windows 安装 DOSBox 0.74，并按 [工具说明
 .\hw3\Build-C.ps1
 ```
 
-后两条命令需要 Cygwin（默认 `C:\cygwin64`，含 GCC 和 objdump）及 Python 3。C EXE 依赖 Cygwin 运行库，在 Windows 环境运行；两份 C 反汇编是 **x86-64**，与手写 **8086 DOS** 代码分别标明。题图没有限定 C 编译器；如课程另行限定 16 位 C 编译器，需要按该限定重新生成 C 反汇编。
+后两条命令需要 Cygwin（默认 `C:\cygwin64`，含 GCC 和 objdump）及 Python 3。C EXE 依赖 Cygwin 运行库，在 Windows 环境运行；两份 C 反汇编是 **x86-64**，与手写 **8086 DOS** 代码分别标明。题目没有限定 C 编译器；如另行限定 16 位 C 编译器，需要按该限定重新生成 C 反汇编。
 
-## 验证
-
-本次提交于 2026-10-21 重新编译和运行，详情见 [验证记录](VERIFICATION.md)。共验证 10 个 DOS EXE，作业 3 的 641 个测试全部通过，两个 C 程序均完成运行及实际反汇编检查。提交保留构建日志、列表和运行结果；批量测试输出可由脚本重新生成。

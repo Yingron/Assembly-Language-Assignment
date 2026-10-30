@@ -1,0 +1,438 @@
+作业四：C 程序的真实反汇编及逐条注释
+环境：Cygwin GCC，x86-64，-x c -O0 -g -Wall -Wextra -Werror -std=c11；objdump -d -S -Mintel。
+指令地址和机器码直接提取自本次 HW4_C.exe 的 C_FULL_DISASM.txt；省略运行库及对齐 NOP。
+这是 64 位 Windows/Cygwin 代码，手写汇编为 8086 DOS，两者寄存器宽度与调用约定不同。
+本机 int 占 4 字节，unsigned char 占 1 字节；前四个整数/指针参数使用 RCX、RDX、R8、R9。
+调用方不能假定 EAX、ECX、EDX 等易失寄存器在调用后保持；本次编译器将循环变量保存在栈中。
+global_table 有静态存储期且位于 .data；local_table 是自动局部数组，本次编译放在栈上。
+全局/局部是作用域概念，存储期要结合声明判断；局部 static 数组也有静态存储期，不能概括为所有局部数组都在栈上。
+本例局部数组每次调用都初始化，调用结束生命周期终止；全局数组在整个程序执行期间存在。
+
+===== print_product =====
+   100401080:	55                   	push   rbp
+    ; 保存调用者的 RBP。
+   100401081:	48 89 e5             	mov    rbp,rsp
+    ; 建立当前函数栈帧。
+   100401084:	48 83 ec 20          	sub    rsp,0x20
+    ; 分配 32 字节调用空间，供后续 printf 调用使用。
+   100401088:	89 4d 10             	mov    DWORD PTR [rbp+0x10],ecx
+    ; 保存第一个 int 参数 row；本机调用约定通过 ECX 传入。
+   10040108b:	89 55 18             	mov    DWORD PTR [rbp+0x18],edx
+    ; 保存第二个 int 参数 column；通过 EDX 传入。
+   10040108e:	8b 45 10             	mov    eax,DWORD PTR [rbp+0x10]
+    ; 读取 row 到 EAX。
+   100401091:	0f af 45 18          	imul   eax,DWORD PTR [rbp+0x18]
+    ; 计算 EAX=row*column。这里是 32 位有符号 IMUL；本题正整数结果与 MUL 一致。
+   100401095:	89 c1                	mov    ecx,eax
+    ; 暂存乘积到 ECX。
+   100401097:	8b 55 18             	mov    edx,DWORD PTR [rbp+0x18]
+    ; 读取 column 到 EDX。
+   10040109a:	8b 45 10             	mov    eax,DWORD PTR [rbp+0x10]
+    ; 读取 row 到 EAX。
+   10040109d:	41 89 c9             	mov    r9d,ecx
+    ; R9D=乘积，作为 printf 的第四个参数。
+   1004010a0:	41 89 d0             	mov    r8d,edx
+    ; R8D=column，作为 printf 的第三个参数。
+   1004010a3:	89 c2                	mov    edx,eax
+    ; EDX=row，作为 printf 的第二个参数。
+   1004010a5:	48 8d 05 54 1f 00 00 	lea    rax,[rip+0x1f54]        # 100403000 <.rdata>
+    ; 计算格式字符串的 RIP 相对地址。
+   1004010ac:	48 89 c1             	mov    rcx,rax
+    ; RCX=格式字符串指针，作为 printf 的第一个参数。
+   1004010af:	e8 fc 02 00 00       	call   1004013b0 <printf>
+    ; 调用 printf；CALL 保存返回地址，printf 返回后继续下一条指令。
+   1004010b4:	90                   	nop
+    ; 空操作，不改变程序结果。
+   1004010b5:	48 83 c4 20          	add    rsp,0x20
+    ; 释放刚才分配的 32 字节。
+   1004010b9:	5d                   	pop    rbp
+    ; 恢复调用者的 RBP。
+   1004010ba:	c3                   	ret
+    ; RET 从栈中取回返回地址，返回 print_table。
+
+===== print_table =====
+   1004010bb:	55                   	push   rbp
+    ; 保存调用者的 RBP。
+   1004010bc:	48 89 e5             	mov    rbp,rsp
+    ; 建立栈帧。
+   1004010bf:	48 83 ec 30          	sub    rsp,0x30
+    ; 分配 48 字节，包含局部变量及函数调用所需空间。
+   1004010c3:	48 8d 05 43 1f 00 00 	lea    rax,[rip+0x1f43]        # 10040300d <.rdata+0xd>
+    ; 取得标题字符串地址。
+   1004010ca:	48 89 c1             	mov    rcx,rax
+    ; 通过 RCX 传递标题字符串指针。
+   1004010cd:	e8 fe 02 00 00       	call   1004013d0 <puts>
+    ; 调用 puts 输出标题并换行。
+   1004010d2:	c7 45 fc 09 00 00 00 	mov    DWORD PTR [rbp-0x4],0x9
+    ; row=9，保存在 [RBP-4]。
+   1004010d9:	eb 30                	jmp    10040110b <print_table+0x50>
+    ; 先跳到外层循环的条件判断处。
+   1004010db:	c7 45 f8 01 00 00 00 	mov    DWORD PTR [rbp-0x8],0x1
+    ; column=1，保存在 [RBP-8]；每一行重新初始化。
+   1004010e2:	eb 11                	jmp    1004010f5 <print_table+0x3a>
+    ; 先跳到内层循环的条件判断处。
+   1004010e4:	8b 55 f8             	mov    edx,DWORD PTR [rbp-0x8]
+    ; EDX=column，准备第二个参数。
+   1004010e7:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+    ; EAX=row。
+   1004010ea:	89 c1                	mov    ecx,eax
+    ; ECX=row，准备第一个参数。
+   1004010ec:	e8 8f ff ff ff       	call   100401080 <print_product>
+    ; 调用 print_product(row,column)。行列值保存在栈中，调用返回后仍可使用。
+   1004010f1:	83 45 f8 01          	add    DWORD PTR [rbp-0x8],0x1
+    ; ++column。
+   1004010f5:	8b 45 f8             	mov    eax,DWORD PTR [rbp-0x8]
+    ; 读取 column。
+   1004010f8:	3b 45 fc             	cmp    eax,DWORD PTR [rbp-0x4]
+    ; 比较 column 和 row，设置标志位。
+   1004010fb:	7e e7                	jle    1004010e4 <print_table+0x29>
+    ; 有符号 column<=row 时继续输出本行下一项。
+   1004010fd:	b9 0a 00 00 00       	mov    ecx,0xa
+    ; ECX=10，即换行符参数。
+   100401102:	e8 b9 02 00 00       	call   1004013c0 <putchar>
+    ; 调用 putchar 输出换行。
+   100401107:	83 6d fc 01          	sub    DWORD PTR [rbp-0x4],0x1
+    ; --row。
+   10040110b:	83 7d fc 00          	cmp    DWORD PTR [rbp-0x4],0x0
+    ; 比较 row 与 0。
+   10040110f:	7f ca                	jg     1004010db <print_table+0x20>
+    ; row>0 时开始下一行，相当于源码的 row>=1。
+   100401111:	90                   	nop
+    ; 空操作。
+   100401112:	90                   	nop
+    ; 空操作。
+   100401113:	48 83 c4 30          	add    rsp,0x30
+    ; 释放 48 字节空间。
+   100401117:	5d                   	pop    rbp
+    ; 恢复调用者的 RBP。
+   100401118:	c3                   	ret
+    ; 返回 main。
+
+===== report_error =====
+   100401119:	55                   	push   rbp
+    ; 保存调用者的 RBP。
+   10040111a:	48 89 e5             	mov    rbp,rsp
+    ; 建立栈帧。
+   10040111d:	48 83 ec 20          	sub    rsp,0x20
+    ; 分配 32 字节调用空间。
+   100401121:	89 4d 10             	mov    DWORD PTR [rbp+0x10],ecx
+    ; 保存参数 row。
+   100401124:	89 55 18             	mov    DWORD PTR [rbp+0x18],edx
+    ; 保存参数 column。
+   100401127:	8b 55 18             	mov    edx,DWORD PTR [rbp+0x18]
+    ; 读取 column。
+   10040112a:	8b 45 10             	mov    eax,DWORD PTR [rbp+0x10]
+    ; 读取 row。
+   10040112d:	41 89 d0             	mov    r8d,edx
+    ; R8D=column，准备 printf 的第三个参数。
+   100401130:	89 c2                	mov    edx,eax
+    ; EDX=row，准备 printf 的第二个参数。
+   100401132:	48 8d 05 e5 1e 00 00 	lea    rax,[rip+0x1ee5]        # 10040301e <.rdata+0x1e>
+    ; 取得错误提示格式字符串地址。
+   100401139:	48 89 c1             	mov    rcx,rax
+    ; RCX=格式字符串指针。
+   10040113c:	e8 6f 02 00 00       	call   1004013b0 <printf>
+    ; 调用 printf 输出从 1 开始的行列坐标。
+   100401141:	90                   	nop
+    ; 空操作。
+   100401142:	48 83 c4 20          	add    rsp,0x20
+    ; 释放 32 字节空间。
+   100401146:	5d                   	pop    rbp
+    ; 恢复调用者的 RBP。
+   100401147:	c3                   	ret
+    ; 返回检查循环。
+
+===== check_global =====
+   100401148:	55                   	push   rbp
+    ; 保存调用者的 RBP。
+   100401149:	48 89 e5             	mov    rbp,rsp
+    ; 建立栈帧。
+   10040114c:	48 83 ec 30          	sub    rsp,0x30
+    ; 分配 48 字节局部及调用空间；81 字节全局数组不在此栈帧内。
+   100401150:	c7 45 f4 00 00 00 00 	mov    DWORD PTR [rbp-0xc],0x0
+    ; errors=0，保存在 [RBP-12]。
+   100401157:	48 8d 05 ce 1e 00 00 	lea    rax,[rip+0x1ece]        # 10040302c <.rdata+0x2c>
+    ; 取得表头字符串 x y 的地址。
+   10040115e:	48 89 c1             	mov    rcx,rax
+    ; 通过 RCX 传入字符串指针。
+   100401161:	e8 6a 02 00 00       	call   1004013d0 <puts>
+    ; 调用 puts 输出表头。
+   100401166:	c7 45 fc 00 00 00 00 	mov    DWORD PTR [rbp-0x4],0x0
+    ; row=0，保存在 [RBP-4]。
+   10040116d:	eb 6b                	jmp    1004011da <check_global+0x92>
+    ; 先跳到外层循环条件处。
+   10040116f:	c7 45 f8 00 00 00 00 	mov    DWORD PTR [rbp-0x8],0x0
+    ; column=0，保存在 [RBP-8]。
+   100401176:	eb 58                	jmp    1004011d0 <check_global+0x88>
+    ; 先跳到内层循环条件处。
+   100401178:	8b 45 f8             	mov    eax,DWORD PTR [rbp-0x8]
+    ; 读取 column。
+   10040117b:	48 63 c8             	movsxd rcx,eax
+    ; 将有符号 32 位 column 扩展为 64 位 RCX，用于地址计算。
+   10040117e:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+    ; 读取 row。
+   100401181:	48 63 d0             	movsxd rdx,eax
+    ; 将 row 扩展为 64 位 RDX。
+   100401184:	48 89 d0             	mov    rax,rdx
+    ; RAX=row。
+   100401187:	48 c1 e0 03          	shl    rax,0x3
+    ; RAX=row*8。
+   10040118b:	48 01 d0             	add    rax,rdx
+    ; RAX=row*9。编译器用移位加法计算下标，不必用乘法指令。
+   10040118e:	48 8d 14 08          	lea    rdx,[rax+rcx*1]
+    ; RDX=row*9+column，元素占 1 字节，因此这就是字节偏移。
+   100401192:	48 8d 05 87 0e 00 00 	lea    rax,[rip+0xe87]        # 100402020 <global_table>
+    ; 取得全局数组 global_table 的 RIP 相对地址。本次链接地址是 0x100402020。
+   100401199:	48 01 d0             	add    rax,rdx
+    ; RAX=global_table基址+row*9+column。
+   10040119c:	0f b6 00             	movzx  eax,BYTE PTR [rax]
+    ; 零扩展读取数组的一个 unsigned char 到 EAX。
+   10040119f:	0f b6 d0             	movzx  edx,al
+    ; 将读取值暂存于 EDX；这条零扩展在本次 -O0 代码中有冗余。
+   1004011a2:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+    ; 读取从 0 开始的 row。
+   1004011a5:	8d 48 01             	lea    ecx,[rax+0x1]
+    ; ECX=row+1。
+   1004011a8:	8b 45 f8             	mov    eax,DWORD PTR [rbp-0x8]
+    ; 读取从 0 开始的 column。
+   1004011ab:	83 c0 01             	add    eax,0x1
+    ; EAX=column+1。
+   1004011ae:	0f af c1             	imul   eax,ecx
+    ; EAX=(row+1)*(column+1)，得到正确乘积。
+   1004011b1:	39 c2                	cmp    edx,eax
+    ; 比较数组实际值 EDX 与正确乘积 EAX。
+   1004011b3:	74 17                	je     1004011cc <check_global+0x84>
+    ; 相等时跳过报错和错误计数，直接进入列递增。
+   1004011b5:	8b 45 f8             	mov    eax,DWORD PTR [rbp-0x8]
+    ; 读取 column。
+   1004011b8:	8d 50 01             	lea    edx,[rax+0x1]
+    ; EDX=column+1，准备从 1 开始的列坐标。
+   1004011bb:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+    ; 读取 row。
+   1004011be:	83 c0 01             	add    eax,0x1
+    ; EAX=row+1，得到从 1 开始的行坐标。
+   1004011c1:	89 c1                	mov    ecx,eax
+    ; ECX=row+1，准备第一个参数。
+   1004011c3:	e8 51 ff ff ff       	call   100401119 <report_error>
+    ; 调用 report_error；函数返回后继续本循环。
+   1004011c8:	83 45 f4 01          	add    DWORD PTR [rbp-0xc],0x1
+    ; ++errors，错误计数保存在 [RBP-12]。
+   1004011cc:	83 45 f8 01          	add    DWORD PTR [rbp-0x8],0x1
+    ; ++column。
+   1004011d0:	83 7d f8 08          	cmp    DWORD PTR [rbp-0x8],0x8
+    ; 比较 column 与 8。
+   1004011d4:	7e a2                	jle    100401178 <check_global+0x30>
+    ; column<=8 时继续内层循环，共检查 9 列。
+   1004011d6:	83 45 fc 01          	add    DWORD PTR [rbp-0x4],0x1
+    ; ++row。
+   1004011da:	83 7d fc 08          	cmp    DWORD PTR [rbp-0x4],0x8
+    ; 比较 row 与 8。
+   1004011de:	7e 8f                	jle    10040116f <check_global+0x27>
+    ; row<=8 时继续外层循环，共检查 9 行。
+   1004011e0:	48 8d 05 49 1e 00 00 	lea    rax,[rip+0x1e49]        # 100403030 <.rdata+0x30>
+    ; 取得完成提示字符串地址。
+   1004011e7:	48 89 c1             	mov    rcx,rax
+    ; 通过 RCX 传入字符串指针。
+   1004011ea:	e8 e1 01 00 00       	call   1004013d0 <puts>
+    ; 调用 puts 输出完成提示。
+   1004011ef:	8b 45 f4             	mov    eax,DWORD PTR [rbp-0xc]
+    ; EAX=errors，作为 int 返回值；原题数据返回 5。
+   1004011f2:	48 83 c4 30          	add    rsp,0x30
+    ; 释放 48 字节空间。
+   1004011f6:	5d                   	pop    rbp
+    ; 恢复调用者的 RBP。
+   1004011f7:	c3                   	ret
+    ; 返回 main。
+
+===== check_local =====
+   1004011f8:	55                   	push   rbp
+    ; 保存调用者的 RBP。
+   1004011f9:	48 89 e5             	mov    rbp,rsp
+    ; 建立栈帧。
+   1004011fc:	48 83 c4 80          	add    rsp,0xffffffffffffff80
+    ; ADD RSP,-128 等价于 RSP-=128；分配 128 字节，包含 81 字节局部数组、计数器、对齐及调用空间。
+   100401200:	48 b8 07 02 03 04 05 	movabs rax,0x807060504030207
+    ; 将局部数组第 1 行前 8 字节的初值装入 RAX；立即数按小端字节顺序写入内存。
+   10040120a:	48 89 45 a0          	mov    QWORD PTR [rbp-0x60],rax
+    ; 把第 1 行前 8 个元素写入当前函数的栈；局部数组基址为 RBP-0x60。
+   10040120e:	c6 45 a8 09          	mov    BYTE PTR [rbp-0x58],0x9
+    ; 把第 1 行第 9 个元素写入栈；每行恰好 9 字节。
+   100401212:	48 b8 02 04 07 08 0a 	movabs rax,0x100e0c0a08070402
+    ; 将局部数组第 2 行前 8 字节的初值装入 RAX；立即数按小端字节顺序写入内存。
+   10040121c:	48 89 45 a9          	mov    QWORD PTR [rbp-0x57],rax
+    ; 把第 2 行前 8 个元素写入当前函数的栈；局部数组基址为 RBP-0x60。
+   100401220:	c6 45 b1 12          	mov    BYTE PTR [rbp-0x4f],0x12
+    ; 把第 2 行第 9 个元素写入栈；每行恰好 9 字节。
+   100401224:	48 b8 03 06 09 0c 0f 	movabs rax,0x1815120f0c090603
+    ; 将局部数组第 3 行前 8 字节的初值装入 RAX；立即数按小端字节顺序写入内存。
+   10040122e:	48 89 45 b2          	mov    QWORD PTR [rbp-0x4e],rax
+    ; 把第 3 行前 8 个元素写入当前函数的栈；局部数组基址为 RBP-0x60。
+   100401232:	c6 45 ba 1b          	mov    BYTE PTR [rbp-0x46],0x1b
+    ; 把第 3 行第 9 个元素写入栈；每行恰好 9 字节。
+   100401236:	48 b8 04 08 0c 10 07 	movabs rax,0x201c1807100c0804
+    ; 将局部数组第 4 行前 8 字节的初值装入 RAX；立即数按小端字节顺序写入内存。
+   100401240:	48 89 45 bb          	mov    QWORD PTR [rbp-0x45],rax
+    ; 把第 4 行前 8 个元素写入当前函数的栈；局部数组基址为 RBP-0x60。
+   100401244:	c6 45 c3 24          	mov    BYTE PTR [rbp-0x3d],0x24
+    ; 把第 4 行第 9 个元素写入栈；每行恰好 9 字节。
+   100401248:	48 b8 05 0a 0f 14 19 	movabs rax,0x28231e19140f0a05
+    ; 将局部数组第 5 行前 8 字节的初值装入 RAX；立即数按小端字节顺序写入内存。
+   100401252:	48 89 45 c4          	mov    QWORD PTR [rbp-0x3c],rax
+    ; 把第 5 行前 8 个元素写入当前函数的栈；局部数组基址为 RBP-0x60。
+   100401256:	c6 45 cc 2d          	mov    BYTE PTR [rbp-0x34],0x2d
+    ; 把第 5 行第 9 个元素写入栈；每行恰好 9 字节。
+   10040125a:	48 b8 06 0c 12 18 1e 	movabs rax,0x302a071e18120c06
+    ; 将局部数组第 6 行前 8 字节的初值装入 RAX；立即数按小端字节顺序写入内存。
+   100401264:	48 89 45 cd          	mov    QWORD PTR [rbp-0x33],rax
+    ; 把第 6 行前 8 个元素写入当前函数的栈；局部数组基址为 RBP-0x60。
+   100401268:	c6 45 d5 36          	mov    BYTE PTR [rbp-0x2b],0x36
+    ; 把第 6 行第 9 个元素写入栈；每行恰好 9 字节。
+   10040126c:	48 b8 07 0e 15 1c 23 	movabs rax,0x38312a231c150e07
+    ; 将局部数组第 7 行前 8 字节的初值装入 RAX；立即数按小端字节顺序写入内存。
+   100401276:	48 89 45 d6          	mov    QWORD PTR [rbp-0x2a],rax
+    ; 把第 7 行前 8 个元素写入当前函数的栈；局部数组基址为 RBP-0x60。
+   10040127a:	c6 45 de 3f          	mov    BYTE PTR [rbp-0x22],0x3f
+    ; 把第 7 行第 9 个元素写入栈；每行恰好 9 字节。
+   10040127e:	48 b8 08 10 18 20 28 	movabs rax,0x738302820181008
+    ; 将局部数组第 8 行前 8 字节的初值装入 RAX；立即数按小端字节顺序写入内存。
+   100401288:	48 89 45 df          	mov    QWORD PTR [rbp-0x21],rax
+    ; 把第 8 行前 8 个元素写入当前函数的栈；局部数组基址为 RBP-0x60。
+   10040128c:	c6 45 e7 48          	mov    BYTE PTR [rbp-0x19],0x48
+    ; 把第 8 行第 9 个元素写入栈；每行恰好 9 字节。
+   100401290:	48 b8 09 12 1b 24 2d 	movabs rax,0x483f362d241b1209
+    ; 将局部数组第 9 行前 8 字节的初值装入 RAX；立即数按小端字节顺序写入内存。
+   10040129a:	48 89 45 e8          	mov    QWORD PTR [rbp-0x18],rax
+    ; 把第 9 行前 8 个元素写入当前函数的栈；局部数组基址为 RBP-0x60。
+   10040129e:	c6 45 f0 51          	mov    BYTE PTR [rbp-0x10],0x51
+    ; 把第 9 行第 9 个元素写入栈；每行恰好 9 字节。
+   1004012a2:	c7 45 f4 00 00 00 00 	mov    DWORD PTR [rbp-0xc],0x0
+    ; errors=0，保存在 [RBP-12]。
+   1004012a9:	48 8d 05 7c 1d 00 00 	lea    rax,[rip+0x1d7c]        # 10040302c <.rdata+0x2c>
+    ; 取得表头字符串 x y 的地址。
+   1004012b0:	48 89 c1             	mov    rcx,rax
+    ; 通过 RCX 传入字符串指针。
+   1004012b3:	e8 18 01 00 00       	call   1004013d0 <puts>
+    ; 调用 puts 输出表头。
+   1004012b8:	c7 45 fc 00 00 00 00 	mov    DWORD PTR [rbp-0x4],0x0
+    ; row=0，保存在 [RBP-4]。
+   1004012bf:	eb 67                	jmp    100401328 <check_local+0x130>
+    ; 先跳到外层循环条件处。
+   1004012c1:	c7 45 f8 00 00 00 00 	mov    DWORD PTR [rbp-0x8],0x0
+    ; column=0，保存在 [RBP-8]。
+   1004012c8:	eb 54                	jmp    10040131e <check_local+0x126>
+    ; 先跳到内层循环条件处。
+   1004012ca:	8b 45 f8             	mov    eax,DWORD PTR [rbp-0x8]
+    ; 读取 column。
+   1004012cd:	48 63 c8             	movsxd rcx,eax
+    ; 将有符号 32 位 column 扩展为 64 位 RCX，用于地址计算。
+   1004012d0:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+    ; 读取 row。
+   1004012d3:	48 63 d0             	movsxd rdx,eax
+    ; 将 row 扩展为 64 位 RDX。
+   1004012d6:	48 89 d0             	mov    rax,rdx
+    ; RAX=row。
+   1004012d9:	48 c1 e0 03          	shl    rax,0x3
+    ; RAX=row*8。
+   1004012dd:	48 01 d0             	add    rax,rdx
+    ; RAX=row*9。编译器用移位加法计算下标，不必用乘法指令。
+   1004012e0:	48 01 e8             	add    rax,rbp
+    ; RAX=RBP+row*9。
+   1004012e3:	48 01 c8             	add    rax,rcx
+    ; RAX=RBP+row*9+column。
+   1004012e6:	48 83 e8 60          	sub    rax,0x60
+    ; RAX=RBP-0x60+row*9+column，即局部数组当前元素的地址。
+   1004012ea:	0f b6 00             	movzx  eax,BYTE PTR [rax]
+    ; 零扩展读取数组的一个 unsigned char 到 EAX。
+   1004012ed:	0f b6 d0             	movzx  edx,al
+    ; 将读取值暂存于 EDX；这条零扩展在本次 -O0 代码中有冗余。
+   1004012f0:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+    ; 读取从 0 开始的 row。
+   1004012f3:	8d 48 01             	lea    ecx,[rax+0x1]
+    ; ECX=row+1。
+   1004012f6:	8b 45 f8             	mov    eax,DWORD PTR [rbp-0x8]
+    ; 读取从 0 开始的 column。
+   1004012f9:	83 c0 01             	add    eax,0x1
+    ; EAX=column+1。
+   1004012fc:	0f af c1             	imul   eax,ecx
+    ; EAX=(row+1)*(column+1)，得到正确乘积。
+   1004012ff:	39 c2                	cmp    edx,eax
+    ; 比较数组实际值 EDX 与正确乘积 EAX。
+   100401301:	74 17                	je     10040131a <check_local+0x122>
+    ; 相等时跳过报错和错误计数，直接进入列递增。
+   100401303:	8b 45 f8             	mov    eax,DWORD PTR [rbp-0x8]
+    ; 读取 column。
+   100401306:	8d 50 01             	lea    edx,[rax+0x1]
+    ; EDX=column+1，准备从 1 开始的列坐标。
+   100401309:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+    ; 读取 row。
+   10040130c:	83 c0 01             	add    eax,0x1
+    ; EAX=row+1，得到从 1 开始的行坐标。
+   10040130f:	89 c1                	mov    ecx,eax
+    ; ECX=row+1，准备第一个参数。
+   100401311:	e8 03 fe ff ff       	call   100401119 <report_error>
+    ; 调用 report_error；函数返回后继续本循环。
+   100401316:	83 45 f4 01          	add    DWORD PTR [rbp-0xc],0x1
+    ; ++errors，错误计数保存在 [RBP-12]。
+   10040131a:	83 45 f8 01          	add    DWORD PTR [rbp-0x8],0x1
+    ; ++column。
+   10040131e:	83 7d f8 08          	cmp    DWORD PTR [rbp-0x8],0x8
+    ; 比较 column 与 8。
+   100401322:	7e a6                	jle    1004012ca <check_local+0xd2>
+    ; column<=8 时继续内层循环，共检查 9 列。
+   100401324:	83 45 fc 01          	add    DWORD PTR [rbp-0x4],0x1
+    ; ++row。
+   100401328:	83 7d fc 08          	cmp    DWORD PTR [rbp-0x4],0x8
+    ; 比较 row 与 8。
+   10040132c:	7e 93                	jle    1004012c1 <check_local+0xc9>
+    ; row<=8 时继续外层循环，共检查 9 行。
+   10040132e:	48 8d 05 fb 1c 00 00 	lea    rax,[rip+0x1cfb]        # 100403030 <.rdata+0x30>
+    ; 取得完成提示字符串地址。
+   100401335:	48 89 c1             	mov    rcx,rax
+    ; 通过 RCX 传入字符串指针。
+   100401338:	e8 93 00 00 00       	call   1004013d0 <puts>
+    ; 调用 puts 输出完成提示。
+   10040133d:	8b 45 f4             	mov    eax,DWORD PTR [rbp-0xc]
+    ; EAX=errors，作为 int 返回值；原题数据返回 5。
+   100401340:	48 83 ec 80          	sub    rsp,0xffffffffffffff80
+    ; SUB RSP,-128 等价于 RSP+=128，释放此函数的栈空间。
+   100401344:	5d                   	pop    rbp
+    ; 恢复调用者的 RBP。
+   100401345:	c3                   	ret
+    ; 返回 main；自动数组的生命周期结束，其原栈空间不能继续作为该数组使用。
+
+===== main =====
+   100401346:	55                   	push   rbp
+    ; 保存调用者的 RBP。
+   100401347:	48 89 e5             	mov    rbp,rsp
+    ; 建立 main 栈帧。
+   10040134a:	48 83 ec 20          	sub    rsp,0x20
+    ; 分配 32 字节调用空间。
+   10040134e:	e8 4d 00 00 00       	call   1004013a0 <__main>
+    ; 调用 Cygwin/GCC 运行时初始化函数 __main。
+   100401353:	e8 63 fd ff ff       	call   1004010bb <print_table>
+    ; 调用 print_table，输出倒三角乘法表。
+   100401358:	48 8d 05 de 1c 00 00 	lea    rax,[rip+0x1cde]        # 10040303d <.rdata+0x3d>
+    ; 取得全局表检查的分隔标题地址。
+   10040135f:	48 89 c1             	mov    rcx,rax
+    ; 通过 RCX 传入标题指针。
+   100401362:	e8 69 00 00 00       	call   1004013d0 <puts>
+    ; 调用 puts。
+   100401367:	e8 dc fd ff ff       	call   100401148 <check_global>
+    ; 调用 check_global；该函数返回错误数量，本示例无需将错误数量作为进程退出码。
+   10040136c:	48 8d 05 d9 1c 00 00 	lea    rax,[rip+0x1cd9]        # 10040304c <.rdata+0x4c>
+    ; 取得局部表检查的分隔标题地址。
+   100401373:	48 89 c1             	mov    rcx,rax
+    ; 通过 RCX 传入标题指针。
+   100401376:	e8 55 00 00 00       	call   1004013d0 <puts>
+    ; 调用 puts。
+   10040137b:	e8 78 fe ff ff       	call   1004011f8 <check_local>
+    ; 调用 check_local，输出相同的五处错误。
+   100401380:	b8 00 00 00 00       	mov    eax,0x0
+    ; EAX=0，作为 main 返回值，表示程序正常完成检查。
+   100401385:	48 83 c4 20          	add    rsp,0x20
+    ; 释放 32 字节调用空间。
+   100401389:	5d                   	pop    rbp
+    ; 恢复调用者的 RBP。
+   10040138a:	c3                   	ret
+    ; 返回运行时。
+

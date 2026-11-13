@@ -1,0 +1,290 @@
+FIB.C 实际反汇编（GCC 13.4.0，Cygwin x86-64，-O0）
+生成：objdump -d -Mintel --disassemble=<函数名> FIB_C.exe
+ECX/RCX 是本例首参寄存器；EAX/RAX 保存整数或指针返回值。
+以下仅保留作业自身的函数。分段注释位于对应机器指令上方。
+
+0000000100401080 <fib>:
+
+; 建立栈帧：保存 RBP，分配 0x40 字节，首参 n 在 ECX，保存到 [RBP+0x10]。
+   100401080:	55                   	push   rbp
+   100401081:	48 89 e5             	mov    rbp,rsp
+   100401084:	48 83 ec 40          	sub    rsp,0x40
+   100401088:	89 4d 10             	mov    DWORD PTR [rbp+0x10],ecx
+
+; 读取 ready[n]；若非零，直接跳到公共的取地址和返回代码。
+   10040108b:	8b 45 10             	mov    eax,DWORD PTR [rbp+0x10]
+   10040108e:	48 8d 15 4b 14 00 00 	lea    rdx,[rip+0x144b]        # 1004024e0 <ready>
+   100401095:	0f b6 04 10          	movzx  eax,BYTE PTR [rax+rdx*1]
+   100401099:	84 c0                	test   al,al
+   10040109b:	0f 85 a5 00 00 00    	jne    100401146 <fib+0xc6>
+
+; ECX = n-1，递归调用 fib；把 RAX 返回的地址 a 存入 [RBP-0x10]。
+   1004010a1:	8b 45 10             	mov    eax,DWORD PTR [rbp+0x10]
+   1004010a4:	83 e8 01             	sub    eax,0x1
+   1004010a7:	89 c1                	mov    ecx,eax
+   1004010a9:	e8 d2 ff ff ff       	call   100401080 <fib>
+   1004010ae:	48 89 45 f0          	mov    QWORD PTR [rbp-0x10],rax
+
+; ECX = n-2，再递归调用 fib；将第二个地址 b 存入 [RBP-0x18]。
+   1004010b2:	8b 45 10             	mov    eax,DWORD PTR [rbp+0x10]
+   1004010b5:	83 e8 02             	sub    eax,0x2
+   1004010b8:	89 c1                	mov    ecx,eax
+   1004010ba:	e8 c1 ff ff ff       	call   100401080 <fib>
+   1004010bf:	48 89 45 e8          	mov    QWORD PTR [rbp-0x18],rax
+
+; carry 和 i 分别在 [RBP-4]、[RBP-8]，初始化为 0 后跳去测试循环条件。
+   1004010c3:	c7 45 fc 00 00 00 00 	mov    DWORD PTR [rbp-0x4],0x0
+   1004010ca:	c7 45 f8 00 00 00 00 	mov    DWORD PTR [rbp-0x8],0x0
+   1004010d1:	eb 5f                	jmp    100401132 <fib+0xb2>
+
+; 按 2*i 寻址并零扩展 a->word[i]、b->word[i]；两者加上 carry 得到 32 位 sum。
+   1004010d3:	48 8b 45 f0          	mov    rax,QWORD PTR [rbp-0x10]
+   1004010d7:	8b 55 f8             	mov    edx,DWORD PTR [rbp-0x8]
+   1004010da:	0f b7 04 50          	movzx  eax,WORD PTR [rax+rdx*2]
+   1004010de:	0f b7 c8             	movzx  ecx,ax
+   1004010e1:	48 8b 45 e8          	mov    rax,QWORD PTR [rbp-0x18]
+   1004010e5:	8b 55 f8             	mov    edx,DWORD PTR [rbp-0x8]
+   1004010e8:	0f b7 04 50          	movzx  eax,WORD PTR [rax+rdx*2]
+   1004010ec:	0f b7 c0             	movzx  eax,ax
+   1004010ef:	8d 14 01             	lea    edx,[rcx+rax*1]
+   1004010f2:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+   1004010f5:	01 d0                	add    eax,edx
+   1004010f7:	89 45 e4             	mov    DWORD PTR [rbp-0x1c],eax
+
+; 用移位和加法计算 12*n+2*i；写入 R8W 的低 16 位到 cache[n].word[i]。
+   1004010fa:	8b 45 e4             	mov    eax,DWORD PTR [rbp-0x1c]
+   1004010fd:	41 89 c0             	mov    r8d,eax
+   100401100:	8b 4d f8             	mov    ecx,DWORD PTR [rbp-0x8]
+   100401103:	8b 55 10             	mov    edx,DWORD PTR [rbp+0x10]
+   100401106:	48 89 d0             	mov    rax,rdx
+   100401109:	48 01 c0             	add    rax,rax
+   10040110c:	48 01 d0             	add    rax,rdx
+   10040110f:	48 01 c0             	add    rax,rax
+   100401112:	48 01 c8             	add    rax,rcx
+   100401115:	48 8d 14 00          	lea    rdx,[rax+rax*1]
+   100401119:	48 8d 05 00 0f 00 00 	lea    rax,[rip+0xf00]        # 100402020 <cache>
+   100401120:	66 44 89 04 02       	mov    WORD PTR [rdx+rax*1],r8w
+
+; sum 右移 16 位得到 carry；i 加一，i<=5 时继续循环。
+   100401125:	8b 45 e4             	mov    eax,DWORD PTR [rbp-0x1c]
+   100401128:	c1 e8 10             	shr    eax,0x10
+   10040112b:	89 45 fc             	mov    DWORD PTR [rbp-0x4],eax
+   10040112e:	83 45 f8 01          	add    DWORD PTR [rbp-0x8],0x1
+   100401132:	83 7d f8 05          	cmp    DWORD PTR [rbp-0x8],0x5
+   100401136:	76 9b                	jbe    1004010d3 <fib+0x53>
+
+; 六个字写完后置 ready[n]=1。
+   100401138:	8b 45 10             	mov    eax,DWORD PTR [rbp+0x10]
+   10040113b:	48 8d 15 9e 13 00 00 	lea    rdx,[rip+0x139e]        # 1004024e0 <ready>
+   100401142:	c6 04 10 01          	mov    BYTE PTR [rax+rdx*1],0x1
+
+; 计算 12*n，再加 cache 基址；RAX 返回 &cache[n]。
+   100401146:	8b 55 10             	mov    edx,DWORD PTR [rbp+0x10]
+   100401149:	48 89 d0             	mov    rax,rdx
+   10040114c:	48 01 c0             	add    rax,rax
+   10040114f:	48 01 d0             	add    rax,rdx
+   100401152:	48 c1 e0 02          	shl    rax,0x2
+   100401156:	48 8d 15 c3 0e 00 00 	lea    rdx,[rip+0xec3]        # 100402020 <cache>
+   10040115d:	48 01 d0             	add    rax,rdx
+
+; 释放局部栈空间并恢复 RBP；RET 取出返回地址。
+   100401160:	48 83 c4 40          	add    rsp,0x40
+   100401164:	5d                   	pop    rbp
+   100401165:	c3                   	ret
+
+0000000100401166 <print_big>:
+
+; RCX 传入 value 地址；用 8+4 字节拷贝组成 12 字节的 work。
+   100401166:	55                   	push   rbp
+   100401167:	48 89 e5             	mov    rbp,rsp
+   10040116a:	48 83 ec 60          	sub    rsp,0x60
+   10040116e:	48 89 4d 10          	mov    QWORD PTR [rbp+0x10],rcx
+   100401172:	48 8b 45 10          	mov    rax,QWORD PTR [rbp+0x10]
+   100401176:	48 8b 10             	mov    rdx,QWORD PTR [rax]
+   100401179:	48 89 55 e0          	mov    QWORD PTR [rbp-0x20],rdx
+   10040117d:	8b 40 08             	mov    eax,DWORD PTR [rax+0x8]
+   100401180:	89 45 e8             	mov    DWORD PTR [rbp-0x18],eax
+
+; 清零 length；每轮清零 remainder、nonzero，将 i 设为 5。
+   100401183:	c7 45 fc 00 00 00 00 	mov    DWORD PTR [rbp-0x4],0x0
+   10040118a:	c7 45 f4 00 00 00 00 	mov    DWORD PTR [rbp-0xc],0x0
+   100401191:	c7 45 f8 00 00 00 00 	mov    DWORD PTR [rbp-0x8],0x0
+   100401198:	c7 45 f0 05 00 00 00 	mov    DWORD PTR [rbp-0x10],0x5
+   10040119f:	eb 76                	jmp    100401217 <print_big+0xb1>
+
+; part = (remainder << 16) | work.word[i]，从最高字开始。
+   1004011a1:	8b 45 f4             	mov    eax,DWORD PTR [rbp-0xc]
+   1004011a4:	c1 e0 10             	shl    eax,0x10
+   1004011a7:	89 c2                	mov    edx,eax
+   1004011a9:	8b 45 f0             	mov    eax,DWORD PTR [rbp-0x10]
+   1004011ac:	48 98                	cdqe
+   1004011ae:	0f b7 44 45 e0       	movzx  eax,WORD PTR [rbp+rax*2-0x20]
+   1004011b3:	0f b7 c0             	movzx  eax,ax
+   1004011b6:	09 d0                	or     eax,edx
+   1004011b8:	89 45 ec             	mov    DWORD PTR [rbp-0x14],eax
+
+; GCC 用乘 0xCCCCCCCD 后右移总计 35 位求无符号 part/10，将商写回 work.word[i]。
+   1004011bb:	8b 45 ec             	mov    eax,DWORD PTR [rbp-0x14]
+   1004011be:	89 c2                	mov    edx,eax
+   1004011c0:	b8 cd cc cc cc       	mov    eax,0xcccccccd
+   1004011c5:	48 0f af c2          	imul   rax,rdx
+   1004011c9:	48 c1 e8 20          	shr    rax,0x20
+   1004011cd:	c1 e8 03             	shr    eax,0x3
+   1004011d0:	89 c2                	mov    edx,eax
+   1004011d2:	8b 45 f0             	mov    eax,DWORD PTR [rbp-0x10]
+   1004011d5:	48 98                	cdqe
+   1004011d7:	66 89 54 45 e0       	mov    WORD PTR [rbp+rax*2-0x20],dx
+
+; 同样计算商，再用移位、加法得到 10*商；part 减去它得到新余数。
+   1004011dc:	8b 4d ec             	mov    ecx,DWORD PTR [rbp-0x14]
+   1004011df:	89 ca                	mov    edx,ecx
+   1004011e1:	b8 cd cc cc cc       	mov    eax,0xcccccccd
+   1004011e6:	48 0f af c2          	imul   rax,rdx
+   1004011ea:	48 c1 e8 20          	shr    rax,0x20
+   1004011ee:	89 c2                	mov    edx,eax
+   1004011f0:	c1 ea 03             	shr    edx,0x3
+   1004011f3:	89 d0                	mov    eax,edx
+   1004011f5:	c1 e0 02             	shl    eax,0x2
+   1004011f8:	01 d0                	add    eax,edx
+   1004011fa:	01 c0                	add    eax,eax
+   1004011fc:	29 c1                	sub    ecx,eax
+   1004011fe:	89 ca                	mov    edx,ecx
+   100401200:	89 55 f4             	mov    DWORD PTR [rbp-0xc],edx
+
+; 将商字并入 nonzero；i 递减，非负则继续处理低位字。
+   100401203:	8b 45 f0             	mov    eax,DWORD PTR [rbp-0x10]
+   100401206:	48 98                	cdqe
+   100401208:	0f b7 44 45 e0       	movzx  eax,WORD PTR [rbp+rax*2-0x20]
+   10040120d:	0f b7 c0             	movzx  eax,ax
+   100401210:	09 45 f8             	or     DWORD PTR [rbp-0x8],eax
+   100401213:	83 6d f0 01          	sub    DWORD PTR [rbp-0x10],0x1
+   100401217:	83 7d f0 00          	cmp    DWORD PTR [rbp-0x10],0x0
+   10040121b:	79 84                	jns    1004011a1 <print_big+0x3b>
+
+; 余数加 ASCII '0'，以 length 为下标写入 digits，并令 length 自增。
+   10040121d:	8b 45 f4             	mov    eax,DWORD PTR [rbp-0xc]
+   100401220:	8d 48 30             	lea    ecx,[rax+0x30]
+   100401223:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+   100401226:	8d 50 01             	lea    edx,[rax+0x1]
+   100401229:	89 55 fc             	mov    DWORD PTR [rbp-0x4],edx
+   10040122c:	89 ca                	mov    edx,ecx
+   10040122e:	89 c0                	mov    eax,eax
+   100401230:	88 54 05 c0          	mov    BYTE PTR [rbp+rax*1-0x40],dl
+
+; 商尚未归零时，继续整轮除 10。
+   100401234:	83 7d f8 00          	cmp    DWORD PTR [rbp-0x8],0x0
+   100401238:	0f 85 4c ff ff ff    	jne    10040118a <print_big+0x24>
+   10040123e:	eb 16                	jmp    100401256 <print_big+0xf0>
+
+; 从尾部读 digits[--length]，经 ECX 传给 putchar，直到 length 归零。
+   100401240:	83 6d fc 01          	sub    DWORD PTR [rbp-0x4],0x1
+   100401244:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+   100401247:	0f b6 44 05 c0       	movzx  eax,BYTE PTR [rbp+rax*1-0x40]
+   10040124c:	0f be c0             	movsx  eax,al
+   10040124f:	89 c1                	mov    ecx,eax
+   100401251:	e8 5a 01 00 00       	call   1004013b0 <putchar>
+   100401256:	83 7d fc 00          	cmp    DWORD PTR [rbp-0x4],0x0
+   10040125a:	75 e4                	jne    100401240 <print_big+0xda>
+   10040125c:	90                   	nop
+   10040125d:	90                   	nop
+
+; 恢复栈帧后返回。
+   10040125e:	48 83 c4 60          	add    rsp,0x60
+   100401262:	5d                   	pop    rbp
+   100401263:	c3                   	ret
+
+0000000100401264 <main>:
+
+; 建立 main 栈帧，调用 Cygwin 的 __main，清零 n 与 count，输出提示。
+   100401264:	55                   	push   rbp
+   100401265:	48 89 e5             	mov    rbp,rsp
+   100401268:	48 83 ec 30          	sub    rsp,0x30
+   10040126c:	e8 0f 01 00 00       	call   100401380 <__main>
+   100401271:	c7 45 fc 00 00 00 00 	mov    DWORD PTR [rbp-0x4],0x0
+   100401278:	c7 45 f8 00 00 00 00 	mov    DWORD PTR [rbp-0x8],0x0
+   10040127f:	48 8d 05 7a 1d 00 00 	lea    rax,[rip+0x1d7a]        # 100403000 <.rdata>
+   100401286:	48 89 c1             	mov    rcx,rax
+   100401289:	e8 32 01 00 00       	call   1004013c0 <puts>
+   10040128e:	eb 3b                	jmp    1004012cb <main+0x67>
+
+; 拒绝非 ASCII '0'～'9' 的字符和第 4 个数字。
+   100401290:	83 7d f4 2f          	cmp    DWORD PTR [rbp-0xc],0x2f
+   100401294:	0f 8e a0 00 00 00    	jle    10040133a <main+0xd6>
+   10040129a:	83 7d f4 39          	cmp    DWORD PTR [rbp-0xc],0x39
+   10040129e:	0f 8f 96 00 00 00    	jg     10040133a <main+0xd6>
+   1004012a4:	83 7d f8 03          	cmp    DWORD PTR [rbp-0x8],0x3
+   1004012a8:	0f 84 8c 00 00 00    	je     10040133a <main+0xd6>
+
+; 移位与加法算出 10*n，再加 ch-'0'；count 自增。
+   1004012ae:	8b 55 fc             	mov    edx,DWORD PTR [rbp-0x4]
+   1004012b1:	89 d0                	mov    eax,edx
+   1004012b3:	c1 e0 02             	shl    eax,0x2
+   1004012b6:	01 d0                	add    eax,edx
+   1004012b8:	01 c0                	add    eax,eax
+   1004012ba:	89 c2                	mov    edx,eax
+   1004012bc:	8b 45 f4             	mov    eax,DWORD PTR [rbp-0xc]
+   1004012bf:	01 d0                	add    eax,edx
+   1004012c1:	83 e8 30             	sub    eax,0x30
+   1004012c4:	89 45 fc             	mov    DWORD PTR [rbp-0x4],eax
+   1004012c7:	83 45 f8 01          	add    DWORD PTR [rbp-0x8],0x1
+
+; getchar 的返回值放在 EAX；遇到 LF、CR 或 EOF 时结束读取。
+   1004012cb:	e8 d0 00 00 00       	call   1004013a0 <getchar>
+   1004012d0:	89 45 f4             	mov    DWORD PTR [rbp-0xc],eax
+   1004012d3:	83 7d f4 0a          	cmp    DWORD PTR [rbp-0xc],0xa
+   1004012d7:	74 0c                	je     1004012e5 <main+0x81>
+   1004012d9:	83 7d f4 0d          	cmp    DWORD PTR [rbp-0xc],0xd
+   1004012dd:	74 06                	je     1004012e5 <main+0x81>
+   1004012df:	83 7d f4 ff          	cmp    DWORD PTR [rbp-0xc],0xffffffff
+   1004012e3:	75 ab                	jne    100401290 <main+0x2c>
+
+; 检查 n 是否在 1～100 内。
+   1004012e5:	83 7d fc 00          	cmp    DWORD PTR [rbp-0x4],0x0
+   1004012e9:	74 52                	je     10040133d <main+0xd9>
+   1004012eb:	83 7d fc 64          	cmp    DWORD PTR [rbp-0x4],0x64
+   1004012ef:	77 4c                	ja     10040133d <main+0xd9>
+
+; 取得 Cygwin 的 stdout；GCC 将固定字符串 fputs 转为 fwrite。
+   1004012f1:	e8 7a 00 00 00       	call   100401370 <__getreent>
+   1004012f6:	48 8b 40 10          	mov    rax,QWORD PTR [rax+0x10]
+   1004012fa:	49 89 c1             	mov    r9,rax
+   1004012fd:	41 b8 07 00 00 00    	mov    r8d,0x7
+   100401303:	ba 01 00 00 00       	mov    edx,0x1
+   100401308:	48 8d 05 02 1d 00 00 	lea    rax,[rip+0x1d02]        # 100403011 <.rdata+0x11>
+   10040130f:	48 89 c1             	mov    rcx,rax
+   100401312:	e8 79 00 00 00       	call   100401390 <fwrite>
+
+; 将 n 放入 ECX 调用 fib；将 RAX 的结果地址移入 RCX 调用 print_big。
+   100401317:	8b 45 fc             	mov    eax,DWORD PTR [rbp-0x4]
+   10040131a:	89 c1                	mov    ecx,eax
+   10040131c:	e8 5f fd ff ff       	call   100401080 <fib>
+   100401321:	48 89 c1             	mov    rcx,rax
+   100401324:	e8 3d fe ff ff       	call   100401166 <print_big>
+
+; putchar 输出 LF，成功时返回 EAX=0。
+   100401329:	b9 0a 00 00 00       	mov    ecx,0xa
+   10040132e:	e8 7d 00 00 00       	call   1004013b0 <putchar>
+   100401333:	b8 00 00 00 00       	mov    eax,0x0
+   100401338:	eb 18                	jmp    100401352 <main+0xee>
+
+; 无效输入分支合流：puts 输出错误提示，EAX=1。
+   10040133a:	90                   	nop
+   10040133b:	eb 01                	jmp    10040133e <main+0xda>
+   10040133d:	90                   	nop
+   10040133e:	48 8d 05 d4 1c 00 00 	lea    rax,[rip+0x1cd4]        # 100403019 <.rdata+0x19>
+   100401345:	48 89 c1             	mov    rcx,rax
+   100401348:	e8 73 00 00 00       	call   1004013c0 <puts>
+   10040134d:	b8 01 00 00 00       	mov    eax,0x1
+
+; 统一恢复 RSP、RBP，返回调用者。
+   100401352:	48 83 c4 30          	add    rsp,0x30
+   100401356:	5d                   	pop    rbp
+   100401357:	c3                   	ret
+   100401358:	90                   	nop
+   100401359:	90                   	nop
+   10040135a:	90                   	nop
+   10040135b:	90                   	nop
+   10040135c:	90                   	nop
+   10040135d:	90                   	nop
+   10040135e:	90                   	nop
+   10040135f:	90                   	nop
